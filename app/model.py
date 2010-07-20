@@ -43,7 +43,8 @@ class Member(db.Model):
 
     @staticmethod
     def get(user):
-        return Member.get_by_key_name(user.user_id())
+        if user:
+            return Member.get_by_key_name(user.user_id())
 
     @staticmethod
     def join(user, tag, stop_time):

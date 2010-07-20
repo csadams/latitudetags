@@ -25,6 +25,7 @@ import latitude
 import model
 import oauth
 import oauth_webapp
+import simplejson
 import utils
 
 # Go to the LATITUDE_OAUTH_START_PATH to start the OAuth dance.
@@ -81,12 +82,13 @@ class LatitudeOAuthCallbackHandler(utils.Handler):
         # Request the user's location.
         client = latitude.LatitudeOAuthClient(oauth_consumer, access_token)
         result = latitude.Latitude(client).get_current_location()
+        data = simplejson.loads(result.content)['data']
 
         # Store the new Member object.
         member = model.Member.create(user)
         member.latitude_key = access_token.key
         member.latitude_secret = access_token.secret
-        member.location = db.GeoPt(1, 2)
+        member.location = db.GeoPt(data['latitude'], data['longitude'])
         member.location_time = datetime.datetime.utcnow()
         member.put()
         raise utils.Redirect('/join')
@@ -94,7 +96,7 @@ class LatitudeOAuthCallbackHandler(utils.Handler):
 
 class Main(utils.Handler):
     def get(self):
-        self.write('Hello.')
+        self.redirect('/join')
 
 
 if __name__ == '__main__':
