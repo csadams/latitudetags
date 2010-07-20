@@ -21,6 +21,12 @@ handlers:
 - url: /
   script: main.py
 
+- url: /latitude_oauth_start
+  script: main.py
+
+- url: /latitude_oauth_callback
+  script: main.py
+
 - url: /join
   script: join.py
 

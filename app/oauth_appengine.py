@@ -105,7 +105,7 @@ class OAuthClient(oauth.OAuthClient):
             method=oauth_request.http_method,
             #headers=oauth_request.to_header(),
             payload=oauth_request.to_postdata())
-        logging.debug(response.content)
+        logging.info(response.content)
         return oauth.OAuthToken.from_string(response.content)
 
     def fetch_access_token(self, oauth_request):
@@ -114,15 +114,15 @@ class OAuthClient(oauth.OAuthClient):
             url=self.access_token_url,
             method=oauth_request.http_method,
             headers=oauth_request.to_header())
-        logging.debug(response.content)
+        logging.info(response.content)
         return oauth.OAuthToken.from_string(response.content)
 
     def access_resource(self, oauth_request, deadline=None):
         """-> Some protected resource."""
         if oauth_request.http_method == 'GET':
             url = oauth_request.to_url()
-            logging.debug(url)
-            logging.debug(oauth_request.to_header())
+            logging.info(url)
+            logging.info(oauth_request.to_header())
             return urlfetch.fetch(
                 url=url,
                 method=oauth_request.http_method)
@@ -142,6 +142,8 @@ class OAuthDanceHelper(object):
 
     def RequestRequestToken(self, callback, parameters=None):
         """Request a request token."""
+        import logging
+        logging.info('RequestRequestToken %r' % [callback, parameters])
         request_token_request = oauth.OAuthRequest.from_consumer_and_token(
             self.oauth_client.get_consumer(),
             token=None,
@@ -157,12 +159,10 @@ class OAuthDanceHelper(object):
             None)
         return self.oauth_client.fetch_request_token(request_token_request)
 
-    def GetAuthorizationRedirectUrl(self, request_token, callback=None,
-            parameters=None):
+    def GetAuthorizationRedirectUrl(self, request_token, parameters=None):
         """A url to redirect a user's browser to."""
         authorization_request = oauth.OAuthRequest.from_token_and_callback(
             request_token,
-            callback=callback,
             http_method='GET',    # Before 5/21/2010 it was POST...
             http_url=self.oauth_client.authorization_url,
             parameters=parameters)

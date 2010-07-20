@@ -1,4 +1,16 @@
+import latitude
 import utils
+
+def latitudeClient(service):
+    access_token = oauth_appengine.OAuthToken.toRealOAuthToken(
+        service.access_token)
+
+  # Construct client
+    oauth_client = latitude.LatitudeOAuthClient(
+        oauth_consumer=oauth.OAuthConsumer(GOOGLE_CONSUMER_KEY,
+            GOOGLE_CONSUMER_SECRET),
+        oauth_token=access_token)
+    return latitude.Latitude(oauth_client)
 
 class Join(utils.Handler):
     def get(self):

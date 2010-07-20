@@ -102,6 +102,9 @@ class OAuthToken(object):
         self.key = key
         self.secret = secret
 
+    def __repr__(self):
+        return 'OAuthToken(%r, %r)' % (self.key, self.secret)
+
     def set_callback(self, callback):
         self.callback = callback
         self.callback_confirmed = 'true'
