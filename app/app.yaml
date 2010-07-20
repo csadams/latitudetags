@@ -30,6 +30,9 @@ handlers:
 - url: /join
   script: join.py
 
+- url: /view(/.*)?
+  script: view.py
+
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin

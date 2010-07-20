@@ -1,22 +1,15 @@
-import latitude
+import datetime
+import model
+import time
 import utils
 
-def latitudeClient(service):
-    access_token = oauth_appengine.OAuthToken.toRealOAuthToken(
-        service.access_token)
-
-  # Construct client
-    oauth_client = latitude.LatitudeOAuthClient(
-        oauth_consumer=oauth.OAuthConsumer(GOOGLE_CONSUMER_KEY,
-            GOOGLE_CONSUMER_SECRET),
-        oauth_token=access_token)
-    return latitude.Latitude(oauth_client)
 
 class Join(utils.Handler):
     def get(self):
+        member = self.require_member()
         self.write('''
 <p>
-<form>
+<form method="post">
 Join <input name="tag" value="#">
 for <select name="duration">
 <option value="600">10 minutes</option>
@@ -31,6 +24,14 @@ for <select name="duration">
 value="Join this group and share my location with everyone in it">
 </form>
         ''')
+
+    def post(self):
+        member = self.require_member()
+        tag = self.request.get('tag')
+        duration = int(self.request.get('duration'))
+        stop_time = datetime.datetime.utcfromtimestamp(time.time() + duration)
+        model.Member.join(member.user, tag, stop_time)
+
 
 if __name__ == '__main__':
     utils.run([('/join', Join)])

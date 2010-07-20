@@ -20,9 +20,12 @@ __author__ = 'Ka-Ping Yee <kpy@google.com>'
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp.util import run_wsgi_app
+import datetime
 import latitude
+import model
 import oauth
 import oauth_webapp
+import utils
 
 # Go to the LATITUDE_OAUTH_START_PATH to start the OAuth dance.
 LATITUDE_OAUTH_START_PATH = '/latitude_oauth_start'
@@ -54,8 +57,10 @@ oauth_consumer = oauth.OAuthConsumer(
     OAuthConfig.get('consumer_key'), OAuthConfig.get('consumer_secret'))
 
 
-class LatitudeOAuthStartHandler(webapp.RequestHandler):
+class LatitudeOAuthStartHandler(utils.Handler):
     def get(self):
+        self.require_user()
+
         parameters = {
             'scope': latitude.LatitudeOAuthClient.SCOPE,
             'domain': OAuthConfig.get('consumer_key'),
@@ -67,20 +72,29 @@ class LatitudeOAuthStartHandler(webapp.RequestHandler):
             self.request.host_url + LATITUDE_OAUTH_CALLBACK_PATH, parameters)
 
 
-class LatitudeOAuthCallbackHandler(webapp.RequestHandler):
+class LatitudeOAuthCallbackHandler(utils.Handler):
     def get(self):
+        user = self.require_user()
         access_token = oauth_webapp.handle_authorization_finished(
             self, latitude.LatitudeOAuthClient(oauth_consumer))
 
-        # Request the user's location
+        # Request the user's location.
         client = latitude.LatitudeOAuthClient(oauth_consumer, access_token)
         result = latitude.Latitude(client).get_current_location()
-        self.response.out.write(result.content)
+
+        # Store the new Member object.
+        member = model.Member.create(user)
+        member.latitude_key = access_token.key
+        member.latitude_secret = access_token.secret
+        member.location = db.GeoPt(1, 2)
+        member.location_time = datetime.datetime.utcnow()
+        member.put()
+        raise utils.Redirect('/join')
 
 
-class Main(webapp.RequestHandler):
+class Main(utils.Handler):
     def get(self):
-        self.response.out.write('Hello.')
+        self.write('Hello.')
 
 
 if __name__ == '__main__':
