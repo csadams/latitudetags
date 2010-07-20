@@ -1,74 +1,75 @@
+# Copyright 2010 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""A simple app that performs the OAuth dance and makes a Latitude request."""
+
+__author__ = 'Ka-Ping Yee <kpy@google.com>'
+
+
 from google.appengine.ext import webapp
+from google.appengine.ext import db
 from google.appengine.ext.webapp.util import run_wsgi_app
-from model import Secret
 import latitude
 import oauth
-import oauth_appengine
-import urllib
+import oauth_webapp
 
+# Go to the LATITUDE_OAUTH_START_PATH to start the OAuth dance.
 LATITUDE_OAUTH_START_PATH = '/latitude_oauth_start'
 LATITUDE_OAUTH_CALLBACK_PATH = '/latitude_oauth_callback'
 
-def make_url(request, path, *args):
-    return (request.host_url + path) % args
+
+# To set up this application as an OAuth consumer:
+# 1. Go to https://www.google.com/accounts/ManageDomains
+# 2. Follow the instructions to register and verify your domain
+# 3. The administration page for your domain should now show an "OAuth
+#    Consumer Key" and "OAuth Consumer Secret".  Put these values into
+#    the app's datastore by calling OAuthConfig.set('consumer_key', ...)
+#    and OAuthConfig.set('consumer_secret', ...).
+
+class OAuthConfig(db.Model):
+    value = db.ByteStringProperty()
+
+    @staticmethod
+    def get(name):
+        secret = OAuthConfig.get_by_key_name(name)
+        return secret and secret.value or None
+
+    @staticmethod
+    def set(name, value):
+        OAuthConfig(key_name=name, value=value).put()
+
 
 oauth_consumer = oauth.OAuthConsumer(
-    Secret.get('oauth_consumer_key'), Secret.get('oauth_consumer_secret'))
+    OAuthConfig.get('consumer_key'), OAuthConfig.get('consumer_secret'))
 
 
-def redirect_to_authorization_url(
-    handler, oauth_client, callback_url, parameters):
-    """Sends the user to an OAuth authorization page."""
-    # Get a request token.
-    helper = oauth_appengine.OAuthDanceHelper(oauth_client)
-    request_token = helper.RequestRequestToken(callback_url, parameters)
-
-    # Save the request token in cookies so we can pick it up later.
-    handler.response.headers.add_header(
-        'Set-Cookie', 'request_key=' + request_token.key)
-    handler.response.headers.add_header(
-        'Set-Cookie', 'request_secret=' + request_token.secret)
-
-    # Send the user to the authorization page.
-    handler.redirect(
-        helper.GetAuthorizationRedirectUrl(request_token, parameters))
-
-def handle_authorization_finished(handler, oauth_client):
-    """Handles a callback from the OAuth authorization page and returns
-    a freshly minted access token."""
-    # Pick up the request token from the cookies.
-    request_token = oauth.OAuthToken(
-        handler.request.cookies['request_key'],
-        handler.request.cookies['request_secret'])
-
-    # Upgrade our request token to an access token, using the verifier.
-    helper = oauth_appengine.OAuthDanceHelper(oauth_client)
-    access_token = helper.RequestAccessToken(
-        request_token, handler.request.get('oauth_verifier', None))
-
-    # Clear the cookies that contained the request token.
-    handler.response.headers.add_header('Set-Cookie', 'request_key=')
-    handler.response.headers.add_header('Set-Cookie', 'request_secret=')
-
-    return access_token
-
-
-class LatitudeOauthStartHandler(webapp.RequestHandler):
+class LatitudeOAuthStartHandler(webapp.RequestHandler):
     def get(self):
         parameters = {
             'scope': latitude.LatitudeOAuthClient.SCOPE,
-            'domain': Secret.get('oauth_consumer_key'),
+            'domain': OAuthConfig.get('consumer_key'),
             'granularity': 'best',
             'location': 'all'
         }
-        redirect_to_authorization_url(
+        oauth_webapp.redirect_to_authorization_page(
             self, latitude.LatitudeOAuthClient(oauth_consumer),
-            make_url(self.request, LATITUDE_OAUTH_CALLBACK_PATH), parameters)
+            self.request.host_url + LATITUDE_OAUTH_CALLBACK_PATH, parameters)
 
 
-class LatitudeOauthCallbackHandler(webapp.RequestHandler):
+class LatitudeOAuthCallbackHandler(webapp.RequestHandler):
     def get(self):
-        access_token = handle_authorization_finished(
+        access_token = oauth_webapp.handle_authorization_finished(
             self, latitude.LatitudeOAuthClient(oauth_consumer))
 
         # Request the user's location
@@ -85,6 +86,6 @@ class Main(webapp.RequestHandler):
 if __name__ == '__main__':
     run_wsgi_app(webapp.WSGIApplication([
         ('/', Main),
-        (LATITUDE_OAUTH_START_PATH, LatitudeOauthStartHandler),
-        (LATITUDE_OAUTH_CALLBACK_PATH, LatitudeOauthCallbackHandler)
+        (LATITUDE_OAUTH_START_PATH, LatitudeOAuthStartHandler),
+        (LATITUDE_OAUTH_CALLBACK_PATH, LatitudeOAuthCallbackHandler)
     ]))

@@ -13,20 +13,3 @@
 # limitations under the License.
 
 from google.appengine.ext import db
-
-class Secret(db.Model):
-    value = db.ByteStringProperty()
-
-    @staticmethod
-    def get(name):
-        secret = Secret.get_by_key_name(name)
-        return secret and secret.value or None
-
-    @staticmethod
-    def set(name, value):
-        Secret(key_name=name, value=value).put()
-
-    @staticmethod
-    def get_or_generate(name):
-        random_key = ''.join('%02x' % random.randrange(256) for i in range(16))
-        return Secret.get_or_insert(key_name=name, value=random_key).value

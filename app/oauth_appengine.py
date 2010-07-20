@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-#
+
 # Copyright 2009 Joe LaPenna
 # Copyright 2009 Google
 
 """
 An appengine OAuthClient based on the oauth-python reference implementation.
 """
-
-import logging
 
 import oauth
 
@@ -33,7 +31,6 @@ class OAuthClient(oauth.OAuthClient):
             method=oauth_request.http_method,
             #headers=oauth_request.to_header(),
             payload=oauth_request.to_postdata())
-        logging.info(response.content)
         return oauth.OAuthToken.from_string(response.content)
 
     def fetch_access_token(self, oauth_request):
@@ -42,15 +39,12 @@ class OAuthClient(oauth.OAuthClient):
             url=self.access_token_url,
             method=oauth_request.http_method,
             headers=oauth_request.to_header())
-        logging.info(response.content)
         return oauth.OAuthToken.from_string(response.content)
 
     def access_resource(self, oauth_request, deadline=None):
         """-> Some protected resource."""
         if oauth_request.http_method == 'GET':
             url = oauth_request.to_url()
-            logging.info(url)
-            logging.info(oauth_request.to_header())
             return urlfetch.fetch(
                 url=url,
                 method=oauth_request.http_method)
@@ -60,7 +54,6 @@ class OAuthClient(oauth.OAuthClient):
                 url=oauth_request.get_normalized_http_url(),
                 method=oauth_request.http_method,
                 payload=payload)
-                #, headers=oauth_request.to_header())
 
 
 class OAuthDanceHelper(object):
@@ -68,10 +61,8 @@ class OAuthDanceHelper(object):
     def __init__(self, oauth_client):
         self.oauth_client = oauth_client
 
-    def RequestRequestToken(self, callback, parameters=None):
-        """Request a request token."""
-        import logging
-        logging.info('RequestRequestToken %r' % [callback, parameters])
+    def GetRequestToken(self, callback, parameters=None):
+        """Gets a request token from an OAuth provider."""
         request_token_request = oauth.OAuthRequest.from_consumer_and_token(
             self.oauth_client.get_consumer(),
             token=None,
@@ -88,16 +79,16 @@ class OAuthDanceHelper(object):
         return self.oauth_client.fetch_request_token(request_token_request)
 
     def GetAuthorizationRedirectUrl(self, request_token, parameters=None):
-        """A url to redirect a user's browser to."""
+        """Gets the redirection URL for the OAuth authorization page."""
         authorization_request = oauth.OAuthRequest.from_token_and_callback(
             request_token,
-            http_method='GET',    # Before 5/21/2010 it was POST...
+            http_method='GET',
             http_url=self.oauth_client.authorization_url,
             parameters=parameters)
         return authorization_request.to_url()
 
-    def RequestAccessToken(self, request_token, verifier=None):
-        """Request an access (get resources with this) token."""
+    def GetAccessToken(self, request_token, verifier):
+        """Upgrades a request token to an access token."""
         access_request = oauth.OAuthRequest.from_consumer_and_token(
             self.oauth_client.get_consumer(),
             token=request_token,
