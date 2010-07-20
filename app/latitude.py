@@ -53,7 +53,7 @@ class Latitude(object):
     def __init__(self, oauth_client):
         self.client = oauth_client
 
-    def currentLocation(self):
+    def get_current_location(self):
         request = oauth.OAuthRequest.from_consumer_and_token(
             self.client.get_consumer(),
             token=self.client.get_token(),
