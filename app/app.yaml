@@ -21,17 +21,14 @@ handlers:
 - url: /
   script: main.py
 
-- url: /latitude_oauth_start
-  script: main.py
+- url: /_oauth_start
+  script: authorize.py
 
-- url: /latitude_oauth_callback
-  script: main.py
+- url: /_oauth_callback
+  script: authorize.py
 
-- url: /join
-  script: join.py
-
-- url: /view(/.*)?
-  script: view.py
+- url: /[a-z0-9]+
+  script: tag.py
 
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py

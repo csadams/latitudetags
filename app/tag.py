@@ -14,11 +14,25 @@
 
 import datetime
 import model
+import time
 import utils
 
 
-class View(utils.Handler):
+class Tag(utils.Handler):
     def get(self, tag):
+        # To allow a join action to redirect to OAuth and smoothly redirect
+        # back here to finish the action, the join action is a GET request.
+        if self.request.get('join'):
+            self.require_member()
+            self.verify_signature()
+            duration = int(self.request.get('duration'))
+            stop_time = datetime.datetime.utcfromtimestamp(
+                time.time() + duration)
+            model.Member.join(self.user, tag, stop_time)
+            # Redirect to avoid adding the join action to the browser history.
+            raise utils.Redirect('/' + tag)
+
+        # Generate the tag viewing page.
         now = datetime.datetime.utcnow()
         members = model.Member.all().filter('tags =', tag)
         rows = []
@@ -29,8 +43,11 @@ class View(utils.Handler):
                 rows.append({'name': member.user.nickname(),
                              'latitude': member.location.lat,
                              'longitude': member.location.lon})
-        self.render('templates/view.html', tag=tag, rows=rows)
+
+        if self.user:
+            self.set_signature()  # to prevent XSRF
+        self.render('templates/tag.html', tag=tag, rows=rows, user=self.user)
 
 
 if __name__ == '__main__':
-    utils.run([('/view/(.*)', View)])
+    utils.run([('/(.*)', Tag)], debug=True)

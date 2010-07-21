@@ -14,14 +14,37 @@
 
 from google.appengine.ext import db
 import datetime
+import random
+
+
+class Config(db.Model):
+    """Stores a configuration setting."""
+    value = db.StringProperty()
+
+    @staticmethod
+    def get(name):
+        config = Config.get_by_key_name(name)
+        return config and config.value or None
+
+    @staticmethod
+    def set(name, value):
+        Config(key_name=name, value=value).put()
+
+    @staticmethod
+    def get_or_generate(name):
+        """Generates a random value if the setting does not already exist.
+        Use this to initialize secret keys."""
+        # TODO(kpy): Use memcache to avoid expensive random number generation.
+        value = ''.join('%02x' % random.randrange(256) for i in range(32))
+        return Config.get_or_insert(key_name=name, value=value).value
 
 
 class Member(db.Model):
     """Represents a user who has authorized hashlatitude.
     key_name: user.user_id()"""
     user = db.UserProperty()
-    latitude_key = db.ByteStringProperty()  # OAuth access token key
-    latitude_secret = db.ByteStringProperty()  # OAuth access token secret
+    latitude_key = db.StringProperty()  # OAuth access token key
+    latitude_secret = db.StringProperty()  # OAuth access token secret
     location = db.GeoPtProperty()  # user's geolocation
     location_time = db.DateTimeProperty()  # time that location was recorded
     tags = db.StringListProperty()  # list of groups this user has joined

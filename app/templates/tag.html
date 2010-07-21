@@ -1,0 +1,46 @@
+<!doctype html public "-//W3C//HTML 4.01 Transitional//EN">
+
+{% load i18n %}
+<title>{% trans "Latitude Tags" %}: #{{ tag }}</title>
+<style>
+body { font-family: helvetica, arial; font-size: 13px; }
+</style>
+
+<h1>#{{ tag }}</h1>
+
+<table>
+  <tr>
+    <th>{% trans "User" %}</th>
+    <th>{% trans "Latitude" %}</th>
+    <th>{% trans "Longitude" %}</th>
+  </tr>
+  {% for row in rows %}
+    <tr>
+      <td>{{ row.name }}</td>
+      <td>{{ row.latitude }}</td>
+      <td>{{ row.longitude }}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+{% if user %}
+  <div class="join">
+    <script>
+    function d(value) {
+      document.getElementById('duration').value = value;
+    }
+    </script>
+    <form method="get">
+      Publish your location to <span class="tag">#{{ tag }}</span> for:
+      <input type=hidden name=duration id=duration value=10>
+      <input type=hidden name=join value=1>
+      <input type=hidden name=signature value="{{ user.signature }}">
+      <input type=submit value="{% trans "5 seconds" %}" onclick="d(5)">
+      <input type=submit value="{% trans "10 minutes" %}" onclick="d(600)">
+      <input type=submit value="{% trans "1 hour" %}" onclick="d(3600)">
+      <input type=submit value="{% trans "4 hours" %}" onclick="d(14400)">
+      <input type=submit value="{% trans "24 hours" %}" onclick="d(86400)">
+      <input type=submit value="{% trans "48 hours" %}" onclick="d(172800)">
+    </form>
+  </div>
+{% endif %}
