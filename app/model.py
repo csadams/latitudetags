@@ -86,6 +86,8 @@ class Member(db.Model):
             member.stop_times.append(stop_time)
             member.put()
         db.run_in_transaction(work)
+        # Ensure that a TagStats entity exists so that stats will be computed.
+        TagStats.get_or_insert(key_name=tag, member_count=1)
 
     @staticmethod
     def quit(user, tag):
@@ -123,17 +125,8 @@ class Member(db.Model):
         db.run_in_transaction(work)
 
 
-class Location(db.Model):
-    """Represents the location information for a single user.
-    key_name: user.user_id()"""
-    update_time = db.DateTimeProperty(auto_now=True)
-    latitude_key = db.StringProperty()  # OAuth access token key
-    latitude_secret = db.StringProperty()  # OAuth access token secret
-    location = db.GeoPtProperty()  # user's geolocation
-
-
-class Group(db.Model):
-    """Represents stale statistics about a particular group.
+class TagStats(db.Model):
+    """Contains periodically updated statistics about a particular tag.
     key_name: tag"""
     update_time = db.DateTimeProperty(auto_now=True)
     member_count = db.IntegerProperty()

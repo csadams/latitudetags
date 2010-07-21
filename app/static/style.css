@@ -34,6 +34,12 @@ body.main .vshadow { left: 0; }
 .navigate input.tag { margin: 12px 4px; width: 8em; }
 .navigate button.go { position: relative; top: -1px; }
 
+.dashboard { font-size: 30px; text-align: center; }
+.leaders { width: 12em; }
+.leaders th { text-align: center; font-weight: normal; }
+.leaders td.tag { text-align: left; }
+.leaders td.count { text-align: right; }
+
 #controls { position: absolute; left: 0; right: 0; bottom: 0; height: 29px; }
 #controls { background: #dde; border-top: 1px solid #bbc; }
 #controls div { position: absolute; bottom: 0; padding: 4px; }

@@ -25,7 +25,7 @@ import utils
 MIN_KEY = str(db.Key.from_path('', 1))
 
 
-class Update(utils.Handler):
+class UpdateMembers(utils.Handler):
     def get(self):
         # Scan through members, updating each one.  Each request picks up
         # where the last one left off, and processes the next 100 members.
@@ -38,9 +38,9 @@ class Update(utils.Handler):
                 member.set_location(utils.get_location(member), now)
         if batch:
             # Schedule a task to continue processing the next batch.
-            taskqueue.add(method='GET', url='/_update',
+            taskqueue.add(method='GET', url='/_update_members',
                           params={'last_key': str(batch[-1].key())})
 
 
 if __name__ == '__main__':
-    utils.run([('/_update', Update)], debug=True)
+    utils.run([('/_update_members', UpdateMembers)], debug=True)

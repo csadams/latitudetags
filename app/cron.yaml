@@ -13,6 +13,10 @@
 # limitations under the License.
 
 cron:
-- description: update
-  url: /_update
+- description: update_members
+  url: /_update_members
   schedule: every 2 minutes
+
+- description: update_tagstats
+  url: /_update_tagstats
+  schedule: every 1 minutes

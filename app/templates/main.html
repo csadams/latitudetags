@@ -25,4 +25,22 @@
   </form>
 </div>
 
+<div class="dashboard">
+  <table class="leaders" align=center>
+  {% if tagstats %}
+    <tr><th colspan=2>Active tags</td></tr>
+  {% else %}
+    <tr><th colspan=2>No active tags</td></tr>
+  {% endif %}
+  {% for tagstat in tagstats %}
+    <tr>
+      <td class="tag">
+        <a href="/{{ tagstat.key.name|escape }}">
+          #{{ tagstat.key.name|escape }}
+        </a>
+      </td>
+      <td class="count">{{ tagstat.member_count|escape }}</td>
+    </tr>
+  {% endfor %}
+  </table>
 </body>

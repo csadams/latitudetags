@@ -33,8 +33,12 @@ handlers:
 - url: /_oauth_callback
   script: register.py
 
-- url: /_update
-  script: update.py
+- url: /_update_members
+  script: update_members.py
+  login: admin
+
+- url: /_update_tagstats
+  script: update_tagstats.py
   login: admin
 
 - url: /remote_api
