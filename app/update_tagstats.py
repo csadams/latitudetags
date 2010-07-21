@@ -30,7 +30,7 @@ class UpdateTagStats(utils.Handler):
         # Scan through tags, updating each one.  Each request picks up
         # where the last one left off, and processes the next 5 tags.
         last_key = db.Key(self.request.get('last_key', MIN_KEY))
-        batch = model.TagStats.all().filter('__key__ >', last_key).fetch(5)
+        batch = model.TagStat.all().filter('__key__ >', last_key).fetch(5)
         for tagstat in batch:
             tag = tagstat.key().name()
             last_key = str(tagstat.key())

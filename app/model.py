@@ -79,24 +79,36 @@ class Member(db.Model):
     @staticmethod
     def join(user, tag, stop_time):
         """Transactionally adds a tag for a user."""
-        def work():
+        def member_work():
             member = Member.get(user)
             member.remove_tag(tag)
             member.tags.append(tag)
             member.stop_times.append(stop_time)
             member.put()
-        db.run_in_transaction(work)
-        # Ensure that a TagStats entity exists so that stats will be computed.
-        TagStats.get_or_insert(key_name=tag, member_count=1)
+
+        def tagstat_work():
+            tagstat = TagStat.get(tag) or TagStat(key_name=tag, member_count=0)
+            tagstat.member_count += 1
+            tagstat.put()
+
+        db.run_in_transaction(member_work)
+        db.run_in_transaction(tagstat_work)
 
     @staticmethod
     def quit(user, tag):
         """Transactionally removes a tag for a user."""
-        def work():
+        def member_work():
             member = Member.get(user)
             member.remove_tag(tag)
             member.put()
-        db.run_in_transaction(work)
+
+        def tagstat_work():
+            tagstat = TagStat.get(tag) or TagStat(key_name=tag, member_count=1)
+            tagstat.member_count -= 1
+            tagstat.put()
+
+        db.run_in_transaction(member_work)
+        db.run_in_transaction(tagstat_work)
 
     def clean(self, now):
         """Transactionally removes all expired tags for this member."""
@@ -125,10 +137,14 @@ class Member(db.Model):
         db.run_in_transaction(work)
 
 
-class TagStats(db.Model):
+class TagStat(db.Model):
     """Contains periodically updated statistics about a particular tag.
     key_name: tag"""
     update_time = db.DateTimeProperty(auto_now=True)
-    member_count = db.IntegerProperty()
+    member_count = db.IntegerProperty(default=0)
     centroid = db.GeoPtProperty()  # centroid of member locations
     radius = db.FloatProperty()  # RMS member distance from centroid
+
+    @staticmethod
+    def get(tag):
+        return TagStat.get_by_key_name(tag)
