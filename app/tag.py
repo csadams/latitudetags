@@ -32,6 +32,19 @@ class Tag(utils.Handler):
             # Redirect to avoid adding the join action to the browser history.
             raise utils.Redirect('/' + tag)
 
+        if self.request.get('quit'):
+            # Remove membership to this tag.
+            model.Member.quit(self.user, tag)
+            # Redirect to avoid adding the join action to the browser history.
+            raise utils.Redirect('/' + tag)
+
+        if self.request.get('quit_all'):
+            # Remove all memberships and the Latitude API authorization.
+            self.require_member()
+            self.verify_signature()
+            self.member.delete()
+            raise utils.Redirect('/')
+
         # Generate the tag viewing page.
         now = datetime.datetime.utcnow()
         members = model.Member.all().filter('tags =', tag)

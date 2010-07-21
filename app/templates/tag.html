@@ -42,5 +42,10 @@ body { font-family: helvetica, arial; font-size: 13px; }
       <input type=submit value="{% trans "24 hours" %}" onclick="d(86400)">
       <input type=submit value="{% trans "48 hours" %}" onclick="d(172800)">
     </form>
+    <form method="get">
+      <input type=hidden name=signature value="{{ user.signature }}">
+      <input type=submit name=quit value="{% trans "Quit" %} #{{ tag }}">
+      <input type=submit name=quit_all value="{% trans "Quit all tags" %}">
+    </form>
   </div>
 {% endif %}

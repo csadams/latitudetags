@@ -36,7 +36,9 @@ import utils
 #    and Config.set('oauth_consumer_secret', ...).
 
 oauth_consumer = oauth.OAuthConsumer(
-    Config.get('oauth_consumer_key'), Config.get('oauth_consumer_secret'))
+    model.Config.get('oauth_consumer_key'),
+    model.Config.get('oauth_consumer_secret')
+)
 
 
 class LatitudeOAuthStartHandler(utils.Handler):
@@ -44,7 +46,7 @@ class LatitudeOAuthStartHandler(utils.Handler):
         self.require_user()
         parameters = {
             'scope': latitude.LatitudeOAuthClient.SCOPE,
-            'domain': Config.get('oauth_consumer_key'),
+            'domain': model.Config.get('oauth_consumer_key'),
             'granularity': 'best',
             'location': 'all'
         }
@@ -57,7 +59,7 @@ class LatitudeOAuthStartHandler(utils.Handler):
 
 class LatitudeOAuthCallbackHandler(utils.Handler):
     def get(self):
-        user = self.require_user()
+        self.require_user()
         access_token = oauth_webapp.handle_authorization_finished(
             self, latitude.LatitudeOAuthClient(oauth_consumer))
 
@@ -67,7 +69,7 @@ class LatitudeOAuthCallbackHandler(utils.Handler):
         data = simplejson.loads(result.content)['data']
 
         # Store the new Member object.
-        member = model.Member.create(user)
+        member = model.Member.create(self.user)
         member.latitude_key = access_token.key
         member.latitude_secret = access_token.secret
         member.location = db.GeoPt(data['latitude'], data['longitude'])

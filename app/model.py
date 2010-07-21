@@ -80,7 +80,7 @@ class Member(db.Model):
         db.run_in_transaction(work)
 
     @staticmethod
-    def leave(user, tag):
+    def quit(user, tag):
         def work():
             member = Member.get(user)
             member.remove_tag(tag)
