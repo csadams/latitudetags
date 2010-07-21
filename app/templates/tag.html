@@ -150,6 +150,8 @@ function populate_list(members) {
     var td = document.createElement('td');
     td.className = 'nickname';
     td.innerText = members[i].nickname;
+    td.onmouseover = make_highlighter(i);
+    td.onmouseout = make_unhighlighter(i);
     tr.appendChild(td);
     {% if show_distances %}
       var td = document.createElement('td');
@@ -159,17 +161,20 @@ function populate_list(members) {
         km += '.0';
       }
       td.innerText = km + ' km';
+      td.onmouseover = make_highlighter(i);
+      td.onmouseout = make_unhighlighter(i);
       tr.appendChild(td);
     {% endif %}
     tbody.appendChild(tr);
     rows.push(tr);
-    td.onmouseover = make_highlighter(i);
-    td.onmouseout = make_unhighlighter(i);
   }
   if (members.length == 0) {
     var tr = document.createElement('tr');
     var td = document.createElement('td');
-    td.innerText = 'No one here.  You could be the first!';
+    {% if show_distances %}
+      td.colSpan = 2;
+    {% endif %}
+    td.innerText = 'No one here.  You could be first!';
     tr.appendChild(td);
     tbody.appendChild(tr);
   }

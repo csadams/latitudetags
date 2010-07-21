@@ -14,7 +14,6 @@ body { font-family: helvetica, arial; font-size: 13px; }
 #sidebar .nickname { text-align: left; }
 #sidebar .distance { text-align: right; }
 #sidebar table.members tbody tr { cursor: pointer; }
-#sidebar table.members tbody tr:hover { background: #ff8; }
 
 #map, .hshadow, .vshadow { position: absolute; left: 200px; top: 24px; }
 #map { right: 0; bottom: 30px; }
