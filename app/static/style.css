@@ -28,7 +28,7 @@ body { font-family: helvetica, arial; font-size: 13px; }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
 
 body.main .vshadow { left: 0; }
-.navigate { text-align: center; margin: 3em; }
+.navigate { text-align: center; margin: 3em 0; }
 .navigate, .navigate input, .navigate button {
     font-family: helvetica, arial; font-size: 30px; }
 .navigate input.tag { margin: 12px 4px; width: 8em; }
