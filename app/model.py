@@ -102,12 +102,16 @@ class Member(db.Model):
             return after_count > before_count
 
         def tagstat_work():
-            tagstat = TagStat.get(tag) or TagStat(key_name=tag, member_count=0)
+            tagstat = TagStat.get(tag) or TagStat(key_name=tag)
             tagstat.member_count += 1
             tagstat.put()
 
         if db.run_in_transaction(member_work):
             db.run_in_transaction(tagstat_work)
+        # If (a) there are no active users for this tag, and (b) the tag
+        # is still in member.tags (with an expired stop_time), the TagStat
+        # entry should still be created even though member_work returns False.
+        TagStat.get_or_insert(key_name=tag, member_count=1)
 
     @staticmethod
     def quit(user, tag):
@@ -121,8 +125,11 @@ class Member(db.Model):
             return after_count < before_count
 
         def tagstat_work():
-            tagstat = TagStat.get(tag) or TagStat(key_name=tag, member_count=1)
+            tagstat = TagStat.get(tag) or TagStat(key_name=tag)
             tagstat.member_count -= 1
+            # If (a) there are no active users for this tag, and (b) the tag
+            # being removed had already expired, don't decrement below zero.
+            tagstat.member_count = max(0, tagstat.member_count)
             tagstat.put()
 
         if db.run_in_transaction(member_work):
