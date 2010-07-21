@@ -22,30 +22,40 @@ import datetime
 import model
 import utils
 
-MIN_KEY = str(db.Key.from_path('', 1))
+# A db.Key guaranteed to come before all others.
+MIN_KEY = str(db.Key.from_path('\x00', 1))
 
 
 class UpdateTagStats(utils.Handler):
     def get(self):
-        # Scan through tags, updating each one.  Each request picks up
-        # where the last one left off, and processes the next 5 tags.
-        last_key = db.Key(self.request.get('last_key', MIN_KEY))
-        batch = model.TagStat.all().filter('__key__ >', last_key).fetch(5)
+        tag = self.request.get('tag', '')
+        if tag:
+            # Update a single specified tag.
+            self.update(tag)
+        else:
+            # Scan through tags, updating each one.  Each request picks up
+            # where the last one left off, and processes the next 5 tags.
+            last_key = db.Key(self.request.get('last_key', MIN_KEY))
+            batch = model.TagStat.all().filter('__key__ >', last_key).fetch(5)
+            for tagstat in batch:
+                last_key = str(tagstat.key())
+                self.update(tagstat.key().name())
+            if batch:
+                # Schedule a task to continue processing the next batch.
+                taskqueue.add(method='GET', url='/_update_tagstats',
+                              params={'last_key': last_key})
+
+    def update(self, tag):
+        """Updates the statistics for a single tag, by name."""
         now = datetime.datetime.utcnow()
-        for tagstat in batch:
-            tag = tagstat.key().name()
-            last_key = str(tagstat.key())
-            tagstat.member_count = len(model.Member.get_for_tag(tag, now))
-            # TODO(kpy): Compute the centroid of the member locations.
-            # TODO(kpy): Compute the RMS distance of members from the centroid.
-            if tagstat.member_count > 0:
-                tagstat.put()
-            else:
-                tagstat.delete()
-        if batch:
-            # Schedule a task to continue processing the next batch.
-            taskqueue.add(method='GET', url='/_update_tagstats',
-                          params={'last_key': last_key})
+        tagstat = model.TagStat.get(tag) or model.TagStat(key_name=tag)
+        tagstat.member_count = len(model.Member.get_for_tag(tag, now))
+        # TODO(kpy): Compute the centroid of the member locations.
+        # TODO(kpy): Compute the RMS distance of members from the centroid.
+        if tagstat.member_count > 0:
+            tagstat.put()
+        else:
+            tagstat.delete()
 
 
 if __name__ == '__main__':

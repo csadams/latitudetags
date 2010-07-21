@@ -22,7 +22,8 @@ import datetime
 import model
 import utils
 
-MIN_KEY = str(db.Key.from_path('', 1))
+# A db.Key guaranteed to come before all others.
+MIN_KEY = str(db.Key.from_path('\x00', 1))
 
 
 class UpdateMembers(utils.Handler):

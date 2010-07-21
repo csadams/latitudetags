@@ -16,6 +16,7 @@
 
 __author__ = 'Ka-Ping Yee <kpy@google.com>'
 
+from google.appengine.api.labs import taskqueue
 import datetime
 import model
 import simplejson
@@ -34,6 +35,9 @@ class Tag(utils.Handler):
             stop_time = datetime.datetime.utcfromtimestamp(
                 time.time() + duration)
             model.Member.join(self.user, tag, stop_time)
+            # Schedule a task to promptly update the stats upon expiry.
+            taskqueue.add(countdown=duration + 1, method='GET',
+                          url='/_update_tagstats', params={'tag': tag})
             # Redirect to avoid adding the join action to the browser history.
             raise utils.Redirect('/' + tag)
 
