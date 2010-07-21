@@ -1,4 +1,4 @@
-# Copyright 2010 Google
+# Copyright 2009-2010 by Ka-Ping Yee
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,28 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-application: latitudetags
-version: 1
-runtime: python
-api_version: 1
-
-handlers:
-- url: /
-  script: main.py
-
-- url: /[a-z0-9]+
-  script: tag.py
-
-- url: /_register
-  script: register.py
-
-- url: /_oauth_callback
-  script: register.py
-
-- url: /_update
-  script: update.py
-  login: admin
-
-- url: /remote_api
-  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin
+cron:
+- description: update
+  url: /_update
+  schedule: every 2 minutes

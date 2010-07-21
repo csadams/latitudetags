@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Utility functions common to all handlers."""
+
+__author__ = 'Ka-Ping Yee <kpy@google.com>'
+
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
@@ -19,14 +23,24 @@ import cgitb
 import crypto
 import google.appengine.ext.webapp.template
 import google.appengine.ext.webapp.util
+import latitude
 import logging
 import model
+import oauth
 import os
 import re
+import simplejson
 import sys
 import urllib
 
 ROOT = os.path.dirname(__file__)
+
+# The datastore should be configured with an OAuth consumer key and secret.
+# Call model.Config.set(name, value) to set these parameters.
+oauth_consumer = oauth.OAuthConsumer(
+    model.Config.get('oauth_consumer_key'),
+    model.Config.get('oauth_consumer_secret')
+)
 
 
 class ErrorMessage(Exception):
@@ -96,14 +110,25 @@ class Handler(webapp.RequestHandler):
                 self.write(cgitb.html(sys.exc_info()))
 
 
+def urlencode(*args, **kwargs):
+    """A shorthand for urllib.urlencode that uses keyword arguments."""
+    return urllib.urlencode(kwargs)
+
+
 def clean_tag(tag):
-    """Normalizes a tag string."""
+    """Normalizes a tag to a plain lowercase identifier."""
     return re.sub('[^A-Za-z0-9]', '', tag).lower()
 
 
+def get_location(member):
+    """Gets a user's location as a db.GeoPt, using the Latitude API."""
+    token = oauth.OAuthToken(member.latitude_key, member.latitude_secret)
+    client = latitude.LatitudeOAuthClient(oauth_consumer, token)
+    result = latitude.Latitude(client).get_current_location()
+    data = simplejson.loads(result.content)['data']
+    return db.GeoPt(data['latitude'], data['longitude'])
+
+
 def run(*args, **kwargs):
+    """Creates and runs a webapp application."""
     webapp.util.run_wsgi_app(webapp.WSGIApplication(*args, **kwargs))
-
-
-def urlencode(*args, **kwargs):
-    return urllib.urlencode(kwargs)

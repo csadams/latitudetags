@@ -16,23 +16,13 @@
 
 __author__ = 'Ka-Ping Yee <kpy@google.com>'
 
-
 from google.appengine.ext import db
 import datetime
 import latitude
 import model
 import oauth
 import oauth_webapp
-import simplejson
 import utils
-
-
-# The datastore should be configured with an OAuth consumer key and secret.
-# Call model.Config.set(name, value) to set these parameters.
-oauth_consumer = oauth.OAuthConsumer(
-    model.Config.get('oauth_consumer_key'),
-    model.Config.get('oauth_consumer_secret')
-)
 
 
 class RegisterHandler(utils.Handler):
@@ -57,7 +47,7 @@ class RegisterHandler(utils.Handler):
             callback_url = self.request.host_url + '/_oauth_callback?' + \
                 utils.urlencode(nickname=nickname, next=next)
             oauth_webapp.redirect_to_authorization_page(
-                self, latitude.LatitudeOAuthClient(oauth_consumer),
+                self, latitude.LatitudeOAuthClient(utils.oauth_consumer),
                 callback_url, parameters)
 
 
@@ -68,19 +58,14 @@ class OAuthCallbackHandler(utils.Handler):
         self.require_user()
         next = self.request.get('next', '')
         access_token = oauth_webapp.handle_authorization_finished(
-            self, latitude.LatitudeOAuthClient(oauth_consumer))
+            self, latitude.LatitudeOAuthClient(utils.oauth_consumer))
 
-        # Request the user's location.
-        client = latitude.LatitudeOAuthClient(oauth_consumer, access_token)
-        result = latitude.Latitude(client).get_current_location()
-        data = simplejson.loads(result.content)['data']
-
-        # Store the new Member object.
+        # Store a new Member object, including the user's current location.
         member = model.Member.create(self.user)
         member.nickname = self.request.get('nickname')
         member.latitude_key = access_token.key
         member.latitude_secret = access_token.secret
-        member.location = db.GeoPt(data['latitude'], data['longitude'])
+        member.location = utils.get_location(member)
         member.location_time = datetime.datetime.utcnow()
         member.put()
         raise utils.Redirect(next or '/')

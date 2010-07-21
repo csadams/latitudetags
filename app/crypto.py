@@ -14,6 +14,8 @@
 
 """Cryptographic operations."""
 
+__author__ = 'Ka-Ping Yee <kpy@google.com>'
+
 import hashlib
 import hmac
 import pickle
@@ -27,7 +29,7 @@ def sha256_hmac(key, bytes):
 
 def sign(key, data, lifetime=None):
     """Produces a signature for the given data.  If 'lifetime' is specified,
-    the signature expires in 'lifetime' seconds."""
+    the signature expires in 'lifetime' seconds; otherwise it never expires."""
     expiry = lifetime and int(time.time() + lifetime) or 0
     bytes = pickle.dumps((data, expiry))
     return sha256_hmac(key, bytes) + '.' + str(expiry)

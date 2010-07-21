@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Tag viewing page for the Latitude Tags application."""
+
+__author__ = 'Ka-Ping Yee <kpy@google.com>'
+
 import datetime
 import model
 import time
@@ -57,7 +61,9 @@ class Tag(utils.Handler):
             if stop_time > now:
                 rows.append({'nickname': member.nickname,
                              'latitude': member.location.lat,
-                             'longitude': member.location.lon})
+                             'longitude': member.location.lon,
+                             'location_time': member.location_time,
+                             'stop_time': stop_time})
 
         if self.user:
             self.set_signature()  # to prevent XSRF
