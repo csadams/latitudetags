@@ -117,6 +117,8 @@ class Member(db.Model):
             index = 0
             while index < len(member.tags):
                 if member.stop_times[index] <= now:
+                    # We don't bother to update member_count here;
+                    # update_tagstats will eventually take care of it.
                     member.remove_tag(member.tags[index])
                 else:
                     index += 1
