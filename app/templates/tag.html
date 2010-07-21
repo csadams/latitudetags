@@ -160,6 +160,9 @@ function populate_list(members) {
       if (km.indexOf('.') < 0) {
         km += '.0';
       }
+      if (members[i].distance >= 100000) {
+        km = Math.round(members[i].distance / 1000);
+      }
       td.innerText = km + ' km';
       td.onmouseover = make_highlighter(i);
       td.onmouseout = make_unhighlighter(i);
