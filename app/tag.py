@@ -20,7 +20,6 @@ from google.appengine.api.labs import taskqueue
 import datetime
 import model
 import simplejson
-import time
 import utils
 
 
@@ -29,11 +28,13 @@ class Tag(utils.Handler):
         # To allow a join action to redirect to OAuth and smoothly redirect
         # back here to finish the action, the join action is a GET request.
         if self.request.get('join'):
+            # Add a tag to the member, and also update the member's location.
             self.require_member()
             self.verify_signature()
+            now = datetime.datetime.utcnow()
             duration = int(self.request.get('duration'))
-            stop_time = datetime.datetime.utcfromtimestamp(
-                time.time() + duration)
+            stop_time = now + datetime.timedelta(0, duration)
+            self.member.set_location(utils.get_location(self.member), now)
             model.Member.join(self.user, tag, stop_time)
             # Schedule a task to promptly update the stats upon expiry.
             taskqueue.add(countdown=duration + 1, method='GET',

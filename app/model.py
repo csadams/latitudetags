@@ -93,34 +93,40 @@ class Member(db.Model):
         """Transactionally adds a tag for a user."""
         def member_work():
             member = Member.get(user)
+            before_count = len(member.tags)
             member.remove_tag(tag)
             member.tags.append(tag)
             member.stop_times.append(stop_time)
+            after_count = len(member.tags)
             member.put()
+            return after_count > before_count
 
         def tagstat_work():
             tagstat = TagStat.get(tag) or TagStat(key_name=tag, member_count=0)
             tagstat.member_count += 1
             tagstat.put()
 
-        db.run_in_transaction(member_work)
-        db.run_in_transaction(tagstat_work)
+        if db.run_in_transaction(member_work):
+            db.run_in_transaction(tagstat_work)
 
     @staticmethod
     def quit(user, tag):
         """Transactionally removes a tag for a user."""
         def member_work():
             member = Member.get(user)
+            before_count = len(member.tags)
             member.remove_tag(tag)
+            after_count = len(member.tags)
             member.put()
+            return after_count < before_count
 
         def tagstat_work():
             tagstat = TagStat.get(tag) or TagStat(key_name=tag, member_count=1)
             tagstat.member_count -= 1
             tagstat.put()
 
-        db.run_in_transaction(member_work)
-        db.run_in_transaction(tagstat_work)
+        if db.run_in_transaction(member_work):
+            db.run_in_transaction(tagstat_work)
 
     def clean(self, now):
         """Transactionally removes all expired tags for this member."""
