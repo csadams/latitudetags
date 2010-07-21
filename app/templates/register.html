@@ -13,6 +13,11 @@
 </form>
 
 <p>
+{# When the request does not already contain an XSRF signature, we have #}
+{# to show a warning to protect the user from an XSRF attack on this page. #}
+{% if anonymous %}
+  {% trans "If you give permission, this site will publish your location." %}
+{% endif %}
 {% trans "Your location will be shown only with this nickname." %}
 
 <script>

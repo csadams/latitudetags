@@ -38,28 +38,32 @@
   </table>
 </div>
 
-{% if user %}
-  <div id="controls">
-    <script>
-    function d(value) {
-      document.getElementById('duration').value = value;
-    }
-    </script>
-    <div class="join">
-      <form method="get">
-        {% blocktrans %}
-          Publish your location to <span class="tag">#{{ tag }}</span>
-          for the next:
-        {% endblocktrans %}
-        <input type=hidden name=duration id=duration value=10>
-        <input type=hidden name=join value=1>
+<div id="controls">
+  <script>
+  function d(value) {
+    document.getElementById('duration').value = value;
+  }
+  </script>
+  <div class="join">
+    <form method="get">
+      {% blocktrans %}
+        Publish your location to <span class="tag">#{{ tag }}</span>
+        for the next:
+      {% endblocktrans %}
+      <input type=hidden name=duration id=duration value=10>
+      <input type=hidden name=join value=1>
+      {% if user %}
         <input type=hidden name=signature value="{{ user.signature }}">
-        <input type=submit value="{% trans "10 minutes" %}" onclick="d(600)">
-        <input type=submit value="{% trans "2 hours" %}" onclick="d(7200)">
-        <input type=submit value="{% trans "6 hours" %}" onclick="d(21600)">
-        <input type=submit value="{% trans "24 hours" %}" onclick="d(86400)">
-      </form>
-    </div>
+      {% else %}
+        <input type=hidden name=anonymous value="1">
+      {% endif %}
+      <input type=submit value="{% trans "10 minutes" %}" onclick="d(600)">
+      <input type=submit value="{% trans "2 hours" %}" onclick="d(7200)">
+      <input type=submit value="{% trans "6 hours" %}" onclick="d(21600)">
+      <input type=submit value="{% trans "24 hours" %}" onclick="d(86400)">
+    </form>
+  </div>
+  {% if user %}
     <div class="quit">
       <form method="get">
         <input type=hidden name=signature value="{{ user.signature }}">
@@ -67,8 +71,8 @@
         <input type=submit name=quit_all value="{% trans "Quit all tags" %}">
       </form>
     </div>
-  </div>
-{% endif %}
+  {% endif %}
+</div>
 
 <script>
 var CHART_API = 'http://chart.apis.google.com/chart?';
