@@ -1,58 +1,180 @@
-<!doctype html public "-//W3C//HTML 4.01 Transitional//EN">
-
 {% load i18n %}
+<!doctype html public "-//W3C//HTML 4.01 Transitional//EN">
+<meta http-equiv="refresh" content="60">
 <title>{% trans "Latitude Tags" %}: #{{ tag }}</title>
-<style>
-body { font-family: helvetica, arial; font-size: 13px; }
-</style>
+<link rel=stylesheet href="static/style.css">
+<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
 
-<h1>#{{ tag }}</h1>
+<div id="header">
+  <div class="title"><a href="/">{% trans "Latitude Tags" %}</a></div>
+  <div class="user">
+    {% if user %}<span class="email">{{ user.email }}</span>{% endif %}
+    {% if member %}({{ member.nickname }}){% endif %}
+  </div>
+</div>
 
-<table>
-  <tr>
-    <th>{% trans "User" %}</th>
-    <th>{% trans "Latitude" %}</th>
-    <th>{% trans "Longitude" %}</th>
-    <th>{% trans "Updated" %}</th>
-    <th>{% trans "Stop Time" %}</th>
-  </tr>
-  {% for row in rows %}
-    <tr>
-      <td>{{ row.nickname|escape }}</td>
-      <td>{{ row.latitude }}</td>
-      <td>{{ row.longitude }}</td>
-      <td>{{ row.location_time }}</td>
-      <td>{{ row.stop_time }}</td>
-    </tr>
-  {% endfor %}
-</table>
+<div id="map"></div>
+<div class="hshadow hs1"></div>
+<div class="hshadow hs2"></div>
+<div class="hshadow hs3"></div>
+<div class="vshadow vs1"></div>
+<div class="vshadow vs2"></div>
+<div class="vshadow vs3"></div>
+
+<div id="sidebar">
+  <h1>#{{ tag }}</h1>
+
+  <table class="members" width="100%" cellpadding=0 cellspacing=0 border=0>
+    <thead>
+      <tr>
+        <th class="nickname">{% trans "Nickname" %}</th>
+        {% if show_distance %}
+          <th class="distance">{% trans "Distance" %}</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody id="members-tbody">
+    </tbody>
+  </table>
+</div>
 
 {% if user %}
-  <div class="join">
+  <div id="controls">
     <script>
     function d(value) {
       document.getElementById('duration').value = value;
     }
     </script>
-    <form method="get">
-      {% blocktrans %}
-        Publish your location to <span class="tag">#{{ tag }}</span>
-        for the next:
-      {% endblocktrans %}
-      <input type=hidden name=duration id=duration value=10>
-      <input type=hidden name=join value=1>
-      <input type=hidden name=signature value="{{ user.signature }}">
-      <input type=submit value="{% trans "5 seconds" %}" onclick="d(5)">
-      <input type=submit value="{% trans "10 minutes" %}" onclick="d(600)">
-      <input type=submit value="{% trans "1 hour" %}" onclick="d(3600)">
-      <input type=submit value="{% trans "4 hours" %}" onclick="d(14400)">
-      <input type=submit value="{% trans "24 hours" %}" onclick="d(86400)">
-      <input type=submit value="{% trans "48 hours" %}" onclick="d(172800)">
-    </form>
-    <form method="get">
-      <input type=hidden name=signature value="{{ user.signature }}">
-      <input type=submit name=quit value="{% trans "Quit" %} #{{ tag }}">
-      <input type=submit name=quit_all value="{% trans "Quit all tags" %}">
-    </form>
+    <div class="join">
+      <form method="get">
+        {% blocktrans %}
+          Publish your location to <span class="tag">#{{ tag }}</span>
+          for the next:
+        {% endblocktrans %}
+        <input type=hidden name=duration id=duration value=10>
+        <input type=hidden name=join value=1>
+        <input type=hidden name=signature value="{{ user.signature }}">
+        <input type=submit value="{% trans "10 minutes" %}" onclick="d(600)">
+        <input type=submit value="{% trans "2 hours" %}" onclick="d(7200)">
+        <input type=submit value="{% trans "6 hours" %}" onclick="d(21600)">
+        <input type=submit value="{% trans "24 hours" %}" onclick="d(86400)">
+      </form>
+    </div>
+    <div class="quit">
+      <form method="get">
+        <input type=hidden name=signature value="{{ user.signature }}">
+        <input type=submit name=quit value="{% trans "Quit" %} #{{ tag }}">
+        <input type=submit name=quit_all value="{% trans "Quit all tags" %}">
+      </form>
+    </div>
   </div>
 {% endif %}
+
+<script>
+var CHART_API = 'http://chart.apis.google.com/chart?';
+var SELF_PIN = new google.maps.MarkerImage(
+    CHART_API + 'chst=d_map_pin_letter&chld=|f77|0',
+    new google.maps.Size(40, 37),
+    new google.maps.Point(0, 0),
+    new google.maps.Point(9, 35)
+);
+var HIGHLIGHTED_SELF_PIN = new google.maps.MarkerImage(
+    CHART_API + 'chst=d_map_pin_letter&chld=|ff0|0',
+    new google.maps.Size(40, 37),
+    new google.maps.Point(0, 0),
+    new google.maps.Point(9, 35)
+);
+var UNHIGHLIGHTED_PIN = new google.maps.MarkerImage(
+    CHART_API + 'chst=d_map_spin&chld=0.4|0|faa|0|',
+    new google.maps.Size(17, 28),
+    new google.maps.Point(0, 0),
+    new google.maps.Point(8, 28)
+);
+var HIGHLIGHTED_PIN = new google.maps.MarkerImage(
+    CHART_API + 'chst=d_map_spin&chld=0.4|0|ff0|0|',
+    new google.maps.Size(17, 28),
+    new google.maps.Point(0, 0),
+    new google.maps.Point(8, 28)
+);
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function initialize_map() {
+  return new google.maps.Map($('map'), {
+    zoom: 10,
+    center: new google.maps.LatLng(0, 0),
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    mapTypeControl: true,
+    scaleControl: true,
+    navigationControl: true,
+    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL}
+  });
+}
+
+function create_markers(map, members) {
+  var markers = [];
+  for (var i = 0; i < members.length; i++) {
+    var marker = new google.maps.Marker({
+      map: map,
+      icon: members[i].self ? SELF_PIN : UNHIGHLIGHTED_PIN,
+      position: new google.maps.LatLng(members[i].lat, members[i].lon),
+      title: members[i].nickname
+    });
+    google.maps.event.addListener(marker, 'mouseover', make_highlighter(i));
+    google.maps.event.addListener(marker, 'mouseout', make_unhighlighter(i));
+    markers.push(marker);
+  }
+  return markers;
+}
+
+function fit_map_bounds(members) {
+  var bounds = new google.maps.LatLngBounds();
+  for (var i = 0; i < members.length; i++) {
+    bounds.extend(new google.maps.LatLng(members[i].lat, members[i].lon));
+  }
+  map.fitBounds(bounds);
+}
+
+function populate_list(members) {
+  var tbody = $('members-tbody');
+  var rows = [];
+  for (var i = 0; i < members.length; i++) {
+    var tr = document.createElement('tr');
+    var td = document.createElement('td');
+    td.innerText = members[i].nickname;
+    tr.appendChild(td);
+    {% if show_distance %}
+      tr.appendChild(document.createElement('td'));
+    {% endif %}
+    tbody.appendChild(tr);
+    rows.push(tr);
+    td.onmouseover = make_highlighter(i);
+    td.onmouseout = make_unhighlighter(i);
+  }
+  return rows;
+}
+
+function make_highlighter(i) {
+  function highlight() {
+    rows[i].style.backgroundColor = '#ff8';
+    markers[i].setIcon(members[i].self ? HIGHLIGHTED_SELF_PIN : HIGHLIGHTED_PIN);
+  }
+  return highlight;
+}
+
+function make_unhighlighter(i) {
+  function unhighlight() {
+    rows[i].style.backgroundColor = '#fff';
+    markers[i].setIcon(members[i].self ? SELF_PIN : UNHIGHLIGHTED_PIN);
+  }
+  return unhighlight;
+}
+
+var map = initialize_map();
+var members = {{ members_json }};
+var markers = create_markers(map, members);
+var rows = populate_list(members, markers);
+fit_map_bounds(members);
+</script>

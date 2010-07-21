@@ -18,6 +18,7 @@ __author__ = 'Ka-Ping Yee <kpy@google.com>'
 
 import datetime
 import model
+import simplejson
 import time
 import utils
 
@@ -54,20 +55,23 @@ class Tag(utils.Handler):
         # Generate the tag viewing page.
         now = datetime.datetime.utcnow()
         members = model.Member.all().filter('tags =', tag)
-        rows = []
+        members_json = []
         for member in members:
             tag_index = member.tags.index(tag)
             stop_time = member.stop_times[tag_index]
             if stop_time > now:
-                rows.append({'nickname': member.nickname,
-                             'latitude': member.location.lat,
-                             'longitude': member.location.lon,
-                             'location_time': member.location_time,
-                             'stop_time': stop_time})
+                member_json = {'nickname': member.nickname,
+                               'lat': member.location.lat,
+                               'lon': member.location.lon}
+                if self.user and self.user.user_id() == member.user.user_id():
+                    member_json['self'] = 1
+                members_json.append(member_json)
 
         if self.user:
             self.set_signature()  # to prevent XSRF
-        self.render('templates/tag.html', tag=tag, rows=rows, user=self.user)
+        self.render('templates/tag.html', tag=tag,
+                    user=self.user, member=model.Member.get(self.user),
+                    members_json=simplejson.dumps(members_json))
 
 
 if __name__ == '__main__':
