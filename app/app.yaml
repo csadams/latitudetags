@@ -21,11 +21,11 @@ handlers:
 - url: /
   script: main.py
 
-- url: /_oauth_start
-  script: authorize.py
+- url: /_register
+  script: register.py
 
 - url: /_oauth_callback
-  script: authorize.py
+  script: register.py
 
 - url: /[a-z0-9]+
   script: tag.py

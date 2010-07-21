@@ -27,39 +27,46 @@ import simplejson
 import utils
 
 
-# To set up this application as an OAuth consumer:
-# 1. Go to https://www.google.com/accounts/ManageDomains
-# 2. Follow the instructions to register and verify your domain
-# 3. The administration page for your domain should now show an "OAuth
-#    Consumer Key" and "OAuth Consumer Secret".  Put these values into
-#    the app's datastore by calling Config.set('oauth_consumer_key', ...)
-#    and Config.set('oauth_consumer_secret', ...).
-
+# The datastore should be configured with an OAuth consumer key and secret.
+# Call model.Config.set(name, value) to set these parameters.
 oauth_consumer = oauth.OAuthConsumer(
     model.Config.get('oauth_consumer_key'),
     model.Config.get('oauth_consumer_secret')
 )
 
 
-class LatitudeOAuthStartHandler(utils.Handler):
+class RegisterHandler(utils.Handler):
+    """Registration and Latitude API authorization for new users."""
+
     def get(self):
         self.require_user()
-        parameters = {
-            'scope': latitude.LatitudeOAuthClient.SCOPE,
-            'domain': model.Config.get('oauth_consumer_key'),
-            'granularity': 'best',
-            'location': 'all'
-        }
-        callback_url = self.request.host_url + utils.OAUTH_CALLBACK_PATH + \
-            '?' + utils.urlencode(next=self.request.get('next', ''))
-        oauth_webapp.redirect_to_authorization_page(
-            self, latitude.LatitudeOAuthClient(oauth_consumer),
-            callback_url, parameters)
+        nickname = self.request.get('nickname', '')
+        next = self.request.get('next', '')
+        if not nickname:
+            # First, ask the user to supply a nickname.
+            self.render('templates/register.html',
+                        next=next, nickname=self.user.nickname())
+        else:
+            # Then proceed to the OAuth authorization page.
+            parameters = {
+                'scope': latitude.LatitudeOAuthClient.SCOPE,
+                'domain': model.Config.get('oauth_consumer_key'),
+                'granularity': 'best',
+                'location': 'current'
+            }
+            callback_url = self.request.host_url + '/_oauth_callback?' + \
+                utils.urlencode(nickname=nickname, next=next)
+            oauth_webapp.redirect_to_authorization_page(
+                self, latitude.LatitudeOAuthClient(oauth_consumer),
+                callback_url, parameters)
 
 
-class LatitudeOAuthCallbackHandler(utils.Handler):
+class OAuthCallbackHandler(utils.Handler):
+    """Handler for the OAuth callback after a user has granted permission.""" 
+
     def get(self):
         self.require_user()
+        next = self.request.get('next', '')
         access_token = oauth_webapp.handle_authorization_finished(
             self, latitude.LatitudeOAuthClient(oauth_consumer))
 
@@ -70,16 +77,17 @@ class LatitudeOAuthCallbackHandler(utils.Handler):
 
         # Store the new Member object.
         member = model.Member.create(self.user)
+        member.nickname = self.request.get('nickname')
         member.latitude_key = access_token.key
         member.latitude_secret = access_token.secret
         member.location = db.GeoPt(data['latitude'], data['longitude'])
         member.location_time = datetime.datetime.utcnow()
         member.put()
-        raise utils.Redirect(self.request.get('next', '') or '/')
+        raise utils.Redirect(next or '/')
 
 
 if __name__ == '__main__':
     utils.run([
-        (utils.OAUTH_START_PATH, LatitudeOAuthStartHandler),
-        (utils.OAUTH_CALLBACK_PATH, LatitudeOAuthCallbackHandler)
+        ('/_register', RegisterHandler),
+        ('/_oauth_callback', OAuthCallbackHandler)
     ])

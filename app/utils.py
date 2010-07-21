@@ -28,10 +28,6 @@ import urllib
 
 ROOT = os.path.dirname(__file__)
 
-# Go to the OAUTH_START_PATH to start the OAuth dance.
-OAUTH_START_PATH = '/_oauth_start'
-OAUTH_CALLBACK_PATH = '/_oauth_callback'
-
 
 class ErrorMessage(Exception):
     """Raise this exception to show an error message to the user."""
@@ -62,7 +58,7 @@ class Handler(webapp.RequestHandler):
         if self.user:
             self.xsrf_key = model.Config.get_or_generate('xsrf_key')
 
-    def set_signature(self, lifetime=60):
+    def set_signature(self, lifetime=None):
         """Generates a signature to prevent XSRF (a confused deputy attack)."""
         self.user.signature = crypto.sign(
             self.xsrf_key, self.user.user_id(), lifetime)
@@ -79,11 +75,10 @@ class Handler(webapp.RequestHandler):
             raise Redirect(users.create_login_url(self.request.uri))
 
     def require_member(self):
-        """Ensures that the user has authorized this app for Latitude."""
+        """Ensures that the user has registered and authorized this app."""
         self.member = model.Member.get(users.get_current_user())
         if not self.member:
-            raise Redirect(
-                OAUTH_START_PATH + '?' + urlencode(next=self.request.uri))
+            raise Redirect('/_register?' + urlencode(next=self.request.uri))
 
     def handle_exception(self, exception, debug_mode):
         """Adds special exception handling for Redirect and ErrorMessage."""

@@ -16,7 +16,7 @@ body { font-family: helvetica, arial; font-size: 13px; }
   </tr>
   {% for row in rows %}
     <tr>
-      <td>{{ row.name }}</td>
+      <td>{{ row.nickname|escape }}</td>
       <td>{{ row.latitude }}</td>
       <td>{{ row.longitude }}</td>
     </tr>
@@ -31,7 +31,10 @@ body { font-family: helvetica, arial; font-size: 13px; }
     }
     </script>
     <form method="get">
-      Publish your location to <span class="tag">#{{ tag }}</span> for:
+      {% blocktrans %}
+        Publish your location to <span class="tag">#{{ tag }}</span>
+        for the next:
+      {% endblocktrans %}
       <input type=hidden name=duration id=duration value=10>
       <input type=hidden name=join value=1>
       <input type=hidden name=signature value="{{ user.signature }}">

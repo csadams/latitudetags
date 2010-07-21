@@ -34,12 +34,14 @@ class Tag(utils.Handler):
 
         if self.request.get('quit'):
             # Remove membership to this tag.
+            self.require_member()
+            self.verify_signature()
             model.Member.quit(self.user, tag)
             # Redirect to avoid adding the join action to the browser history.
             raise utils.Redirect('/' + tag)
 
         if self.request.get('quit_all'):
-            # Remove all memberships and the Latitude API authorization.
+            # Remove the user's registration and Latitude API authorization.
             self.require_member()
             self.verify_signature()
             self.member.delete()
@@ -53,7 +55,7 @@ class Tag(utils.Handler):
             tag_index = member.tags.index(tag)
             stop_time = member.stop_times[tag_index]
             if stop_time > now:
-                rows.append({'name': member.user.nickname(),
+                rows.append({'nickname': member.nickname,
                              'latitude': member.location.lat,
                              'longitude': member.location.lon})
 

@@ -40,9 +40,10 @@ class Config(db.Model):
 
 
 class Member(db.Model):
-    """Represents a user who has authorized hashlatitude.
+    """Represents a user who has registered and authorized this app.
     key_name: user.user_id()"""
     user = db.UserProperty()
+    nickname = db.StringProperty()  # nickname to show with the user's location
     latitude_key = db.StringProperty()  # OAuth access token key
     latitude_secret = db.StringProperty()  # OAuth access token secret
     location = db.GeoPtProperty()  # user's geolocation
