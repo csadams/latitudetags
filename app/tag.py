@@ -18,6 +18,7 @@ __author__ = 'Ka-Ping Yee <kpy@google.com>'
 
 from google.appengine.api.labs import taskqueue
 import datetime
+import geo
 import model
 import simplejson
 import utils
@@ -58,21 +59,28 @@ class Tag(utils.Handler):
             raise utils.Redirect('/')
 
         # Generate the tag viewing page.
+        self.get_member()
         now = datetime.datetime.utcnow()
         members_json = []
+        members = model.Member.get_for_tag(tag, now)
         for member in model.Member.get_for_tag(tag, now):
             member_json = {'nickname': member.nickname,
                            'lat': member.location.lat,
                            'lon': member.location.lon}
             if self.user and self.user.user_id() == member.user.user_id():
                 member_json['self'] = 1
+            if self.member:
+                member_json['distance'] = geo.distance(
+                    self.member.location, member.location)
             members_json.append(member_json)
+        members_json.sort(key=lambda m: (m.get('distance', 0), m['nickname']))
 
         if self.user:
             self.set_signature()  # to prevent XSRF
         self.render('templates/tag.html', tag=tag,
                     user=self.user, member=model.Member.get(self.user),
-                    members_json=simplejson.dumps(members_json))
+                    members_json=simplejson.dumps(members_json),
+                    show_distances=self.member)
 
 
 if __name__ == '__main__':

@@ -28,7 +28,7 @@
     <thead>
       <tr>
         <th class="nickname">{% trans "Nickname" %}</th>
-        {% if show_distance %}
+        {% if show_distances %}
           <th class="distance">{% trans "Distance" %}</th>
         {% endif %}
       </tr>
@@ -148,10 +148,18 @@ function populate_list(members) {
   for (var i = 0; i < members.length; i++) {
     var tr = document.createElement('tr');
     var td = document.createElement('td');
+    td.className = 'nickname';
     td.innerText = members[i].nickname;
     tr.appendChild(td);
-    {% if show_distance %}
-      tr.appendChild(document.createElement('td'));
+    {% if show_distances %}
+      var td = document.createElement('td');
+      td.className = 'distance';
+      var km = Math.round(members[i].distance / 100)/10 + '';
+      if (km.indexOf('.') < 0) {
+        km += '.0';
+      }
+      td.innerText = km + ' km';
+      tr.appendChild(td);
     {% endif %}
     tbody.appendChild(tr);
     rows.push(tr);

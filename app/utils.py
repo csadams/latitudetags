@@ -88,9 +88,14 @@ class Handler(webapp.RequestHandler):
         if not self.user:
             raise Redirect(users.create_login_url(self.request.uri))
 
+    def get_member(self):
+        """Looks up the Member entity for this user, if any."""
+        self.member = model.Member.get(users.get_current_user())
+        return self.member
+
     def require_member(self):
         """Ensures that the user has registered and authorized this app."""
-        self.member = model.Member.get(users.get_current_user())
+        self.get_member()
         if not self.member:
             raise Redirect('/_register?' + urlencode(next=self.request.uri))
 
