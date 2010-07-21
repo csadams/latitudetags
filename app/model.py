@@ -66,6 +66,18 @@ class Member(db.Model):
             self.stop_times[index:index + 1] = []
 
     @staticmethod
+    def get_for_tag(tag, now):
+        """Gets all active members of the given tag."""
+        members = Member.all().filter('tags =', tag).fetch(1000)
+        results = []
+        for member in members:
+            tag_index = member.tags.index(tag)
+            stop_time = member.stop_times[tag_index]
+            if stop_time > now:
+                results.append(member)
+        return results
+
+    @staticmethod
     def create(user):
         """Creates a Member object for a user."""
         return Member(key_name=user.user_id(), user=user)

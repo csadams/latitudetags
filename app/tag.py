@@ -54,18 +54,14 @@ class Tag(utils.Handler):
 
         # Generate the tag viewing page.
         now = datetime.datetime.utcnow()
-        members = model.Member.all().filter('tags =', tag)
         members_json = []
-        for member in members:
-            tag_index = member.tags.index(tag)
-            stop_time = member.stop_times[tag_index]
-            if stop_time > now:
-                member_json = {'nickname': member.nickname,
-                               'lat': member.location.lat,
-                               'lon': member.location.lon}
-                if self.user and self.user.user_id() == member.user.user_id():
-                    member_json['self'] = 1
-                members_json.append(member_json)
+        for member in model.Member.get_for_tag(tag, now):
+            member_json = {'nickname': member.nickname,
+                           'lat': member.location.lat,
+                           'lon': member.location.lon}
+            if self.user and self.user.user_id() == member.user.user_id():
+                member_json['self'] = 1
+            members_json.append(member_json)
 
         if self.user:
             self.set_signature()  # to prevent XSRF

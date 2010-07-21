@@ -31,11 +31,11 @@ class UpdateTagStats(utils.Handler):
         # where the last one left off, and processes the next 5 tags.
         last_key = db.Key(self.request.get('last_key', MIN_KEY))
         batch = model.TagStat.all().filter('__key__ >', last_key).fetch(5)
+        now = datetime.datetime.utcnow()
         for tagstat in batch:
             tag = tagstat.key().name()
             last_key = str(tagstat.key())
-            tagstat.member_count = \
-                model.Member.all().filter('tags =', tag).count()
+            tagstat.member_count = len(model.Member.get_for_tag(tag, now))
             # TODO(kpy): Compute the centroid of the member locations.
             # TODO(kpy): Compute the RMS distance of members from the centroid.
             if tagstat.member_count > 0:

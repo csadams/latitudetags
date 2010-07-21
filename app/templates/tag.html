@@ -57,6 +57,7 @@
       {% else %}
         <input type=hidden name=anonymous value="1">
       {% endif %}
+      <input type=submit value="{% trans "10 seconds" %}" onclick="d(10)">
       <input type=submit value="{% trans "10 minutes" %}" onclick="d(600)">
       <input type=submit value="{% trans "2 hours" %}" onclick="d(7200)">
       <input type=submit value="{% trans "6 hours" %}" onclick="d(21600)">
