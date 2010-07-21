@@ -157,6 +157,13 @@ function populate_list(members) {
     td.onmouseover = make_highlighter(i);
     td.onmouseout = make_unhighlighter(i);
   }
+  if (members.length == 0) {
+    var tr = document.createElement('tr');
+    var td = document.createElement('td');
+    td.innerText = 'No one here.  You could be the first!';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
   return rows;
 }
 

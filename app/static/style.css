@@ -27,6 +27,13 @@ body { font-family: helvetica, arial; font-size: 13px; }
 .vs2 { height: 3px; opacity: 0.06; filter:alpha(opacity=6); }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
 
+body.main .vshadow { left: 0; }
+.navigate { text-align: center; margin: 3em; }
+.navigate, .navigate input, .navigate button {
+    font-family: helvetica, arial; font-size: 30px; }
+.navigate input.tag { margin: 12px 4px; width: 8em; }
+.navigate button.go { position: relative; top: -1px; }
+
 #controls { position: absolute; left: 0; right: 0; bottom: 0; height: 29px; }
 #controls { background: #dde; border-top: 1px solid #bbc; }
 #controls div { position: absolute; bottom: 0; padding: 4px; }

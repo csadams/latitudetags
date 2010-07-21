@@ -16,6 +16,7 @@
 
 __author__ = 'Ka-Ping Yee <kpy@google.com>'
 
+import model
 import utils
 
 
@@ -24,7 +25,8 @@ class Main(utils.Handler):
         tag = utils.clean_tag(self.request.get('tag', ''))
         if tag:
             raise utils.Redirect('/' + tag)
-        self.render('templates/main.html')
+        self.render('templates/main.html', user=self.user,
+                    member=model.Member.get(self.user))
 
 
 if __name__ == '__main__':
