@@ -3,7 +3,7 @@
 <meta http-equiv="refresh" content="60">
 <title>{% trans "Latitude Tags" %}: #{{ tag }}</title>
 <link rel=stylesheet href="static/style.css">
-<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<!--<script src="http://maps.google.com/maps/api/js?sensor=false"></script-->
 
 <div id="header">
   <div class="title"><a href="/">{% trans "Latitude Tags" %}</a></div>
@@ -23,6 +23,63 @@
 
 <div id="sidebar">
   <h1>#{{ tag }}</h1>
+
+  <div class="controls">
+    {% if joined %}
+      {% trans "Publishing your location for" %}
+      <div class="button"
+          onmouseover="add_class(this, 'hover')"
+          onmouseout="remove_class(this, 'hover'); remove_class(this, 'active')"
+          onmousedown="add_class(this, 'active'); return false"
+          onmouseup="remove_class(this, 'active'); return false">
+        <div class="box">
+          <div class="shadow">&nbsp;</div>
+          <div class="content">
+            {{ time_left }}
+            <span class="disclosure">&#x25bc;</span>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="button left"
+          onmouseover="add_class(this, 'hover')"
+          onmouseout="remove_class(this, 'hover'); remove_class(this, 'active')"
+          onmousedown="add_class(this, 'active'); return false"
+          onmouseup="remove_class(this, 'active'); return false">
+        <div class="box">
+          <div class="shadow">&nbsp;</div>
+          <div class="content">{% trans "Join for 1 hour" %}</div>
+        </div>
+      </div
+      ><div class="button right"
+          onmouseover="add_class(this, 'hover')"
+          onmouseout="remove_class(this, 'hover'); remove_class(this, 'active')"
+          onmousedown="add_class(this, 'active'); show('join-menu'); return false"
+          onmouseup="remove_class(this, 'active'); event.stopPropagation(); show('join-menu'); return false">
+        <div class="box">
+          <div class="shadow">&nbsp;</div>
+          <div class="content">
+            &nbsp;<span class="disclosure">&#x25bc;</span>
+          </div>
+        </div>
+        <div class="menu" id="join-menu">
+          <div class="items">
+            <div class="item" onmouseover="add_class(this, 'hover')"
+                onmouseout="remove_class(this, 'hover')"
+                onmousedown="event.stopPropagation()">10 min</div>
+            <div class="item" onmouseover="add_class(this, 'hover')"
+                onmouseout="remove_class(this, 'hover')">1 hour</div>
+            <div class="item" onmouseover="add_class(this, 'hover')"
+                onmouseout="remove_class(this, 'hover')">2 hours</div>
+            <div class="item" onmouseover="add_class(this, 'hover')"
+                onmouseout="remove_class(this, 'hover')">6 hours</div>
+            <div class="item" onmouseover="add_class(this, 'hover')"
+                onmouseout="remove_class(this, 'hover')">24 hours</div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
 
   <table class="members" width="100%" cellpadding=0 cellspacing=0 border=0>
     <thead>
@@ -76,6 +133,8 @@
 </div>
 
 <script>
+document.body.onmouseup = function(e) { hide('join-menu'); };
+
 var CHART_API = 'http://chart.apis.google.com/chart?';
 var SELF_PIN = new google.maps.MarkerImage(
     CHART_API + 'chst=d_map_pin_letter&chld=|f77|0',
@@ -198,6 +257,35 @@ function make_unhighlighter(i) {
     markers[i].setIcon(members[i].self ? SELF_PIN : UNHIGHLIGHTED_PIN);
   }
   return unhighlight;
+}
+
+function show(id) {
+  $(id).style.display = 'block';
+}
+
+function hide(id) {
+  $(id).style.display = 'none';
+}
+
+function add_class(element, name) {
+  var classes = element.className.split(/ +/);
+  for (var i = 0; i < classes.length; i++) {
+    if (classes[i] == name) return;
+  }
+  classes.push(name);
+  element.className = classes.join(' ');
+}
+
+function remove_class(element, name) {
+  var classes = element.className.split(/ +/);
+  for (var i = 0; i < classes.length;) {
+    if (classes[i] == name) {
+      classes.splice(i, 1);
+    } else {
+      i++;
+    }
+  }
+  element.className = classes.join(' ');
 }
 
 var map = initialize_map();
