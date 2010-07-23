@@ -71,6 +71,7 @@ function populate_list(tbody, members, show_distance) {
   var rows = [];
   for (var i = 0; i < members.length; i++) {
     var tr = document.createElement('tr');
+    tr.onclick = make_selector(i);
     var td = document.createElement('td');
     td.className = 'nickname';
     td.innerText = members[i].nickname;
@@ -106,6 +107,13 @@ function populate_list(tbody, members, show_distance) {
     tbody.appendChild(tr);
   }
   return rows;
+}
+
+function make_selector(i) {
+  function select() {
+    map.panTo(new google.maps.LatLng(members[i].lat, members[i].lon));
+  }
+  return select;
 }
 
 function make_highlighter(i) {
