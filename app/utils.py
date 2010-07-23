@@ -97,7 +97,8 @@ class Handler(webapp.RequestHandler):
     def require_member(self):
         """Ensures that the user has registered and authorized this app."""
         if not self.member:
-            raise Redirect('/_register?' + urlencode(next=self.request.uri))
+            raise Redirect('/_register?' + urlencode(
+                next=self.request.uri, duration=self.request.get('duration')))
 
     def handle_exception(self, exception, debug_mode):
         """Adds special exception handling for Redirect and ErrorMessage."""

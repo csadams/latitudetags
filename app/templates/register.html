@@ -3,22 +3,17 @@
 <title>{% trans "Latitude Tags" %}</title>
 <link rel=stylesheet href="static/style.css">
 
-<h1>{% trans "Choose a nickname" %}</h1>
+<h1>{% trans "Joining will publish your location" %}</h1>
+
+<p>
+{% trans "Your location will be be visible to the public, but only identified by a nickname you choose." %}
 
 <p>
 <form method=get>
 <input type=hidden name=next value="{{ next|escape }}">
 <input name=nickname id=nickname value="{{ nickname|escape }}">
-<input type=submit value="{% trans "Go" %}">
+<input type=submit value="{% blocktrans %}Publish my location for {{ duration }}{% endblocktrans %}">
 </form>
-
-<p>
-{# When the request does not already contain an XSRF signature, we have #}
-{# to show a warning to protect the user from an XSRF attack on this page. #}
-{% if anonymous %}
-  {% trans "If you give permission, this site will publish your location." %}
-{% endif %}
-{% trans "Your location will be shown only with this nickname." %}
 
 <script>
   document.getElementById('nickname').focus();

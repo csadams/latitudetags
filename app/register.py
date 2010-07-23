@@ -32,18 +32,11 @@ class RegisterHandler(utils.Handler):
         self.require_user()
         nickname = self.request.get('nickname', '')
         next = self.request.get('next', '')
+        duration = utils.describe_delta(
+            datetime.timedelta(0, int(self.request.get('duration', '0'))))
         if not nickname:
-            # First, ask the user to supply a nickname.
-            anonymous = '&anonymous=1' in next
-            if anonymous:
-                # The user was not signed in when the original request was
-                # made, so we need to add the signature now.
-                self.set_signature()
-                next = next.replace(
-                    '&anonymous=1', '&signature=' + self.user.signature)
-            nickname = self.user.nickname().split('@')[0]
-            self.render('templates/register.html', next=next,
-                        nickname=nickname, anonymous=anonymous)
+            self.render('templates/register.html', next=next, duration=duration,
+                        nickname=self.user.nickname().split('@')[0])
         else:
             # Then proceed to the OAuth authorization page.
             parameters = {
