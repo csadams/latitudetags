@@ -43,44 +43,34 @@ class Tag(utils.Handler):
             # Redirect to avoid adding the join action to the browser history.
             raise utils.Redirect('/' + tag)
 
-        if self.request.get('quit'):
-            # Remove membership to this tag.
-            self.require_member()
-            self.verify_signature()
-            model.Member.quit(self.user, tag)
-            # Redirect to avoid adding the join action to the browser history.
-            raise utils.Redirect('/' + tag)
-
-        if self.request.get('quit_all'):
-            # Remove the user's registration and Latitude API authorization.
-            self.require_member()
-            self.verify_signature()
-            self.member.delete()
-            raise utils.Redirect('/')
-
         # Generate the tag viewing page.
-        self.get_member()
         now = datetime.datetime.utcnow()
-        members_json = []
-        members = model.Member.get_for_tag(tag, now)
+        user_id = self.user and self.user.user_id()
+        joined = ''
+        members = []
         for member in model.Member.get_for_tag(tag, now):
-            member_json = {'nickname': member.nickname,
-                           'lat': member.location.lat,
-                           'lon': member.location.lon}
-            if self.user and self.user.user_id() == member.user.user_id():
-                member_json['self'] = 1
-            if self.member:
-                member_json['distance'] = geo.distance(
-                    self.member.location, member.location)
-            members_json.append(member_json)
-        members_json.sort(key=lambda m: (m.get('distance', 0), m['nickname']))
-
+            if member.user.user_id() == user_id:
+                joined = utils.describe_delta(member.get_stop_time(tag) - now)
+            else:
+                members.append(self.get_member_info(member))
+        members.sort(key=lambda m: (m.get('distance', 0), m['nickname']))
+        if joined:
+            members.insert(0, self.get_member_info(self.member))
+            members[0]['is_self'] = 1
+            members[0]['nickname'] += ' (you)'
         if self.user:
             self.set_signature()  # to prevent XSRF
-        self.render('templates/tag.html', tag=tag,
-                    user=self.user, member=model.Member.get(self.user),
-                    members_json=simplejson.dumps(members_json),
-                    show_distances=self.member)
+        self.render('templates/tag.html', vars=self.vars,
+                    tag=tag, joined=joined, members=simplejson.dumps(members))
+
+    def get_member_info(self, member):
+        info = {'nickname': member.nickname,
+                'lat': member.location.lat,
+                'lon': member.location.lon}
+        if self.member:
+            info['distance'] = geo.distance(
+                self.member.location, member.location)
+        return info
 
 
 if __name__ == '__main__':

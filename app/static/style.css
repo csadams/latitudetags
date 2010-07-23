@@ -1,4 +1,5 @@
 body { font-family: helvetica, arial; font-size: 13px; }
+.tag { font-weight: bold; }
 
 #header div { position: absolute; top: 0; padding: 4px; }
 #header .title { left: 0; font-weight: bold; }
@@ -6,7 +7,7 @@ body { font-family: helvetica, arial; font-size: 13px; }
 #header .user { right: 0; padding: 4px 8px; z-index: 1; }
 #header .email { font-weight: bold; }
 
-#sidebar { position: absolute; left: 0; width: 200px; top: 24px; bottom: 0; }
+#sidebar { position: absolute; left: 0; width: 260px; top: 24px; bottom: 0; }
 #sidebar h1 { margin: 0; padding: 4px; background: #dde; }
 #sidebar table.members { margin-top: 8px; }
 #sidebar table.members thead th { border-bottom: 1px solid #eef; }
@@ -15,9 +16,11 @@ body { font-family: helvetica, arial; font-size: 13px; }
 #sidebar .distance { text-align: right; }
 #sidebar table.members tbody tr { cursor: pointer; }
 
-#map, .hshadow, .vshadow { position: absolute; left: 200px; top: 24px; }
-#map { right: 0; bottom: 30px; }
-.hshadow { bottom: 30px; background: #000; font-size: 1px; }
+#controls { padding: 4px; }
+
+#map, .hshadow, .vshadow { position: absolute; left: 260px; top: 24px; }
+#map { right: 0; bottom: 0; }
+.hshadow { bottom: 0; background: #000; font-size: 1px; }
 .hs1 { width: 2px; opacity: 0.09; filter:alpha(opacity=9); }
 .hs2 { width: 3px; opacity: 0.06; filter:alpha(opacity=6); }
 .hs3 { width: 4px; opacity: 0.03; filter:alpha(opacity=3); }
@@ -26,7 +29,7 @@ body { font-family: helvetica, arial; font-size: 13px; }
 .vs2 { height: 3px; opacity: 0.06; filter:alpha(opacity=6); }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
 
-body.main .vshadow { left: 0; }
+body#main .vshadow { left: 0; }
 .navigate { text-align: center; margin: 3em 0; }
 .navigate, .navigate input, .navigate button {
     font-family: helvetica, arial; font-size: 30px; }
@@ -38,10 +41,3 @@ body.main .vshadow { left: 0; }
 .leaders th { text-align: center; font-weight: normal; }
 .leaders td.tag { text-align: left; }
 .leaders td.count { text-align: right; }
-
-#controls { position: absolute; left: 0; right: 0; bottom: 0; height: 29px; }
-#controls { background: #dde; border-top: 1px solid #bbc; }
-#controls div { position: absolute; bottom: 0; padding: 4px; }
-#controls .join { left: 0; }
-#controls .quit { right: 0; }
-#controls .tag { font-weight: bold; }

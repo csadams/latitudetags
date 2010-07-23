@@ -26,8 +26,7 @@ class Main(utils.Handler):
         if tag:
             raise utils.Redirect('/' + tag)
         tagstats = model.TagStat.all().order('-member_count').fetch(20)
-        self.render('templates/main.html', user=self.user,
-                    member=model.Member.get(self.user), tagstats=tagstats)
+        self.render('templates/main.html', vars=self.vars, tagstats=tagstats)
 
 
 if __name__ == '__main__':

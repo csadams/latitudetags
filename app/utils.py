@@ -69,12 +69,18 @@ class Handler(webapp.RequestHandler):
         """Sets up useful handler variables for every request."""
         webapp.RequestHandler.initialize(self, request, response)
         self.user = users.get_current_user()
+        self.member = model.Member.get(users.get_current_user())
         if self.user:
             self.xsrf_key = model.Config.get_or_generate('xsrf_key')
 
+        # Populate self.vars with useful variables for templates.
+        self.vars = {'user': self.user, 'member': self.member,
+                     'login_url': users.create_login_url(request.uri),
+                     'logout_url': users.create_logout_url(request.uri)}
+
     def set_signature(self, lifetime=None):
         """Generates a signature to prevent XSRF (a confused deputy attack)."""
-        self.user.signature = crypto.sign(
+        self.vars['signature'] = crypto.sign(
             self.xsrf_key, self.user.user_id(), lifetime)
 
     def verify_signature(self):
@@ -88,14 +94,8 @@ class Handler(webapp.RequestHandler):
         if not self.user:
             raise Redirect(users.create_login_url(self.request.uri))
 
-    def get_member(self):
-        """Looks up the Member entity for this user, if any."""
-        self.member = model.Member.get(users.get_current_user())
-        return self.member
-
     def require_member(self):
         """Ensures that the user has registered and authorized this app."""
-        self.get_member()
         if not self.member:
             raise Redirect('/_register?' + urlencode(next=self.request.uri))
 
@@ -113,6 +113,16 @@ class Handler(webapp.RequestHandler):
             if debug_mode:
                 self.response.clear()
                 self.write(cgitb.html(sys.exc_info()))
+
+
+def describe_delta(delta):
+    seconds = delta.days * 24 * 3600 + delta.seconds
+    minutes = round(seconds/60.0)
+    hours = round(minutes/60.0)
+    if minutes < 60:
+        return '%d min' % minutes
+    else:
+        return '%d h' % hours
 
 
 def urlencode(*args, **kwargs):

@@ -41,8 +41,9 @@ class RegisterHandler(utils.Handler):
                 self.set_signature()
                 next = next.replace(
                     '&anonymous=1', '&signature=' + self.user.signature)
+            nickname = self.user.nickname().split('@')[0]
             self.render('templates/register.html', next=next,
-                        nickname=self.user.nickname(), anonymous=anonymous)
+                        nickname=nickname, anonymous=anonymous)
         else:
             # Then proceed to the OAuth authorization page.
             parameters = {

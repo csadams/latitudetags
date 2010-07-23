@@ -1,0 +1,25 @@
+{% load i18n %}<!doctype html public "-//W3C//HTML 4.01 Transitional//EN">
+<title>{% block title %}{% trans "Latitude Tags" %}{% endblock %}</title>
+<link rel=stylesheet href="static/style.css">
+
+<body id="{% block id %}{% endblock %}">
+  <div id="header">
+    <div class="title"><a href="/">{% trans "Latitude Tags" %}</a></div>
+    <div class="user">
+      {% if vars.user %}
+        <span class="email">{{ vars.user.email|escape }}</span>
+        {% if vars.member %}({{ vars.member.nickname|escape }}){% endif %}
+        &nbsp;
+        <a href="{{ vars.logout_url|escape }}">{% trans "Sign out" %}</a>
+      {% else %}
+        <a href="{{ vars.login_url|escape }}">{% trans "Sign in" %}</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% block content %}{% endblock %}
+
+  <div class="vshadow vs1"></div>
+  <div class="vshadow vs2"></div>
+  <div class="vshadow vs3"></div>
+</body>

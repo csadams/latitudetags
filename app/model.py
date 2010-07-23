@@ -58,6 +58,10 @@ class Member(db.Model):
     # NOTE: tags and stop_times are parallel arrays!
     # INVARIANT: len(tags) == len(stop_times)
 
+    def get_stop_time(self, tag):
+        """Gets the stop time for a particular tag."""
+        return self.stop_times[self.tags.index(tag)]
+
     def remove_tag(self, tag):
         """Removes a tag from self.tags, preserving the invariant."""
         if tag in self.tags:
