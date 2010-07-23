@@ -38,7 +38,7 @@ class UpdateMembers(utils.Handler):
             member = member.clean(now)
             if member.tags:
                 member.set_location(utils.get_location(member), now)
-            logging.info('updated member: ' + member.user.email())
+                logging.info('updated member: ' + member.user.email())
         if batch:
             # Schedule a task to continue processing the next batch.
             taskqueue.add(method='GET', url='/_update_members',

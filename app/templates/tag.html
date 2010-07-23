@@ -29,11 +29,11 @@
     {% else %}
       {% if vars.user %}
         {% trans "Join this tag for:" %}
-        <a href="#" onclick="join(600)">10min</a>
-        <a href="#" onclick="join(3600)">1h</a>
-        <a href="#" onclick="join(10800)">3h</a>
-        <a href="#" onclick="join(43200)">12h</a>
-        <a href="#" onclick="join(86400)">24h</a>
+        &nbsp;<a href="#" onclick="join(600)">10min</a>
+        &nbsp;<a href="#" onclick="join(3600)">1h</a>
+        &nbsp;<a href="#" onclick="join(10800)">3h</a>
+        &nbsp;<a href="#" onclick="join(43200)">12h</a>
+        &nbsp;<a href="#" onclick="join(86400)">24h</a>
       {% else %}
         <a href="{{ vars.login_url }}">
           {% trans "Sign in to join this tag" %}
