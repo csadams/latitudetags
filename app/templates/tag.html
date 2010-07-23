@@ -46,7 +46,7 @@
     <thead>
       <tr>
         <th class="nickname">{% trans "Nickname" %}</th>
-        {% if member %}
+        {% if vars.member %}
           <th class="distance">{% trans "Distance" %}</th>
         {% endif %}
       </tr>
@@ -63,7 +63,7 @@
 </form>
 
 <script>
-  var is_member = {{ member|yesno:"true,false" }};
+  var is_member = {{ vars.member|yesno:"true,false" }};
   var joined = {{ joined|yesno:"true,false" }};
   var members = {{ members }};
 
