@@ -19,6 +19,7 @@ __author__ = 'Ka-Ping Yee <kpy@google.com>'
 from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 import datetime
+import logging
 import model
 import utils
 
@@ -56,6 +57,7 @@ class UpdateTagStats(utils.Handler):
             tagstat.put()
         else:
             tagstat.delete()
+        logging.info('updated tag: ' + tag)
 
 
 if __name__ == '__main__':

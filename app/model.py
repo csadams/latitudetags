@@ -95,49 +95,22 @@ class Member(db.Model):
     @staticmethod
     def join(user, tag, stop_time):
         """Transactionally adds a tag for a user."""
-        def member_work():
+        def work():
             member = Member.get(user)
-            before_count = len(member.tags)
             member.remove_tag(tag)
             member.tags.append(tag)
             member.stop_times.append(stop_time)
-            after_count = len(member.tags)
             member.put()
-            return after_count > before_count
-
-        def tagstat_work():
-            tagstat = TagStat.get(tag) or TagStat(key_name=tag)
-            tagstat.member_count += 1
-            tagstat.put()
-
-        if db.run_in_transaction(member_work):
-            db.run_in_transaction(tagstat_work)
-        # If (a) there are no active users for this tag, and (b) the tag
-        # is still in member.tags (with an expired stop_time), the TagStat
-        # entry should still be created even though member_work returns False.
-        TagStat.get_or_insert(key_name=tag, member_count=1)
+        db.run_in_transaction(work)
 
     @staticmethod
     def quit(user, tag):
         """Transactionally removes a tag for a user."""
-        def member_work():
+        def work():
             member = Member.get(user)
-            before_count = len(member.tags)
             member.remove_tag(tag)
-            after_count = len(member.tags)
             member.put()
-            return after_count < before_count
-
-        def tagstat_work():
-            tagstat = TagStat.get(tag) or TagStat(key_name=tag)
-            tagstat.member_count -= 1
-            # If (a) there are no active users for this tag, and (b) the tag
-            # being removed had already expired, don't decrement below zero.
-            tagstat.member_count = max(0, tagstat.member_count)
-            tagstat.put()
-
-        if db.run_in_transaction(member_work):
-            db.run_in_transaction(tagstat_work)
+        db.run_in_transaction(work)
 
     def clean(self, now):
         """Transactionally removes all expired tags for this member."""
@@ -153,7 +126,7 @@ class Member(db.Model):
                     index += 1
             member.put()
             return member
-        # Test if cleaning is needed, before starting a transaction.
+        # Before starting a transaction, test if cleaning is needed.
         if self.stop_times and min(self.stop_times) <= now:
             return db.run_in_transaction(work)
         return self

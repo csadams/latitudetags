@@ -37,9 +37,15 @@ class Tag(utils.Handler):
             stop_time = now + datetime.timedelta(0, duration)
             self.member.set_location(utils.get_location(self.member), now)
             model.Member.join(self.user, tag, stop_time)
+            # Ensure that a TagStat entity exists, to be later updated.
+            model.TagStat.get_or_insert(key_name=tag)
+            # Schedule a task to update the stats now.
+            taskqueue.add(
+                method='GET', url='/_update_tagstats', params={'tag': tag})
             # Schedule a task to promptly update the stats upon expiry.
-            taskqueue.add(countdown=duration + 1, method='GET',
-                          url='/_update_tagstats', params={'tag': tag})
+            taskqueue.add(
+                method='GET', countdown=duration + 1,
+                url='/_update_tagstats', params={'tag': tag})
             # Redirect to avoid adding the join action to the browser history.
             raise utils.Redirect('/' + tag)
 

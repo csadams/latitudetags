@@ -19,6 +19,7 @@ __author__ = 'Ka-Ping Yee <kpy@google.com>'
 from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 import datetime
+import logging
 import model
 import utils
 
@@ -37,6 +38,7 @@ class UpdateMembers(utils.Handler):
             member = member.clean(now)
             if member.tags:
                 member.set_location(utils.get_location(member), now)
+            logging.info('updated member: ' + member.user.email())
         if batch:
             # Schedule a task to continue processing the next batch.
             taskqueue.add(method='GET', url='/_update_members',
