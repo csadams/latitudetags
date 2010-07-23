@@ -142,7 +142,8 @@ def get_location(member):
     client = latitude.LatitudeOAuthClient(oauth_consumer, token)
     result = latitude.Latitude(client).get_current_location()
     data = simplejson.loads(result.content)['data']
-    return db.GeoPt(data['latitude'], data['longitude'])
+    if 'latitude' in data and 'longitude' in data:
+        return db.GeoPt(data['latitude'], data['longitude'])
 
 
 def run(*args, **kwargs):

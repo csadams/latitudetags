@@ -68,6 +68,10 @@ class OAuthCallbackHandler(utils.Handler):
         member.latitude_secret = access_token.secret
         member.location = utils.get_location(member)
         member.location_time = datetime.datetime.utcnow()
+        if not member.location:
+            raise utils.ErrorMessage(400, '''
+Sorry, Google Latitude has no current location for you.
+''')
         member.put()
         raise utils.Redirect(next or '/')
 
