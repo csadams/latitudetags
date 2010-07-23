@@ -85,7 +85,7 @@ function populate_list(tbody, members, show_distance) {
       if (km.indexOf('.') < 0) {
         km += '.0';
       }
-      if (members[i].distance >= 100000) {
+      if (members[i].distance >= 10000) {
         km = Math.round(members[i].distance / 1000);
       }
       td.innerText = km + ' km';
