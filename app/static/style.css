@@ -1,22 +1,28 @@
 body { font-family: helvetica, arial; font-size: 13px; }
 .tag { font-weight: bold; }
 
+/* Styles common to all pages. */
+
 #header div { position: absolute; top: 0; padding: 4px; }
 #header .title { left: 0; font-weight: bold; }
 #header .title a { text-decoration: none; color: #000; }
-#header .user { right: 0; padding: 4px 8px; z-index: 1; }
+#header .user { right: 0; padding: 4px 8px; }
 #header .email { font-weight: bold; }
+.content { padding: 4px; }
 
-#sidebar { position: absolute; left: 0; width: 260px; top: 24px; bottom: 0; }
-#sidebar h1 { margin: 0; padding: 4px; background: #dde; }
-#sidebar table.members { margin-top: 8px; }
-#sidebar table.members thead th { border-bottom: 1px solid #eef; }
-#sidebar th, #sidebar td { padding: 4px; }
-#sidebar .nickname { text-align: left; }
-#sidebar .distance { text-align: right; }
-#sidebar table.members tbody tr { cursor: pointer; }
+/* Tag page. */
 
-#controls { padding: 4px; }
+#tag, #controls, #member-table { position: absolute; left: 0; }
+#tag { top: 24px; width: 260px; height: 40px; background: #dde; }
+#tag h1 { margin: 0; font-size: 26px; }
+#controls { top: 64px; width: 260px; height: 36px; white-space: nowrap; }
+#member-table { top: 100px; width: 260px; bottom: 0; }
+#member-table thead th { border-bottom: 1px solid #eef; }
+#member-table th, #member-table td { padding: 4px; }
+#member-table .nickname { text-align: left; }
+#member-table .distance { text-align: right; }
+#member-table tbody tr { cursor: pointer; }
+#member-select { display: none; }
 
 #map, .hshadow, .vshadow { position: absolute; left: 260px; top: 24px; }
 #map { right: 0; bottom: 0; }
@@ -29,11 +35,13 @@ body { font-family: helvetica, arial; font-size: 13px; }
 .vs2 { height: 3px; opacity: 0.06; filter:alpha(opacity=6); }
 .vs3 { height: 4px; opacity: 0.03; filter:alpha(opacity=3); }
 
-body#main .vshadow { left: 0; }
+/* Main page. */
+
+#main-page .vshadow { left: 0; }
 .navigate { text-align: center; margin: 3em 0; }
 .navigate, .navigate input, .navigate button {
     font-family: helvetica, arial; font-size: 30px; }
-.navigate input.tag { margin: 12px 4px; width: 8.5em; }
+.navigate input { margin: 12px 4px; width: 8.5em; }
 .navigate button.go { position: relative; top: -1px; }
 
 .dashboard { font-size: 30px; text-align: center; }

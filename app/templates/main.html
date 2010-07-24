@@ -1,11 +1,11 @@
 {% load i18n %}{% extends "page.html" %}
-{% block id %}main{% endblock %}
+{% block page %}main{% endblock %}
 
 {% block content %}
 <div class="navigate">
   {% trans "Watch, join, or create a tag" %}
   <form method="get">
-    #<input class="tag" name="tag" value="">
+    #<input name="tag" value="">
     <button class="go" type="submit">Go</button>
   </form>
 </div>

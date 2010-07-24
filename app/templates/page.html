@@ -1,9 +1,20 @@
 {% load i18n %}<!doctype html public "-//W3C//HTML 4.01 Transitional//EN">
-<title>{% block title %}{% trans "Latitude Tags" %}{% endblock %}</title>
-<link rel=stylesheet href="static/style.css">
-<meta http-equiv="refresh" content="60">
+<head>
+  <title>{% block title %}{% trans "Latitude Tags" %}{% endblock %}</title>
+  <meta http-equiv="refresh" content="60">
+  <link rel=stylesheet href="static/style.css">
+  {% if vars.is_mobile %}
+    <meta name="viewport" content="user-scalable=no">
+    <link rel=stylesheet href="static/mobile.css">
+  {% endif %}
+  <script>
+    var is_member = {{ vars.member|yesno:"true,false" }};
+    var is_mobile = {{ vars.is_mobile|yesno:"true,false" }};
+  </script>
+  {% block scripts %}{% endblock %}
+</head>
 
-<body id="{% block id %}{% endblock %}">
+<body id="{% block page %}{% endblock %}-page">
   <div id="header">
     <div class="title"><a href="/">{% trans "Latitude Tags" %}</a></div>
     <div class="user">

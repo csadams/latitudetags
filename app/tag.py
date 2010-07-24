@@ -52,22 +52,22 @@ class Tag(utils.Handler):
         # Generate the tag viewing page.
         now = datetime.datetime.utcnow()
         user_id = self.user and self.user.user_id()
-        joined = ''
+        join_time = ''
         members = []
         for member in model.Member.get_for_tag(tag, now):
             if member.user.user_id() == user_id:
-                joined = utils.describe_delta(member.get_stop_time(tag) - now)
+                join_time = utils.describe_delta(
+                    member.get_stop_time(tag) - now)
             else:
                 members.append(self.get_member_info(member))
         members.sort(key=lambda m: (m.get('distance', 0), m['nickname']))
-        if joined:
+        if join_time:
             members.insert(0, self.get_member_info(self.member))
             members[0]['is_self'] = 1
-            members[0]['nickname'] += ' (you)'
         if self.user:
             self.set_signature()  # to prevent XSRF
-        self.render('templates/tag.html', vars=self.vars,
-                    tag=tag, joined=joined, members=simplejson.dumps(members))
+        self.render('templates/tag.html', vars=self.vars, tag=tag,
+                    join_time=join_time, members=simplejson.dumps(members))
 
     def get_member_info(self, member):
         info = {'nickname': member.nickname,
@@ -80,4 +80,4 @@ class Tag(utils.Handler):
 
 
 if __name__ == '__main__':
-    utils.run([('/(.*)', Tag)], debug=True)
+    utils.run([('/([a-z0-9]+)', Tag)], debug=True)

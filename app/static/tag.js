@@ -37,9 +37,13 @@ function initialize_map(element) {
     center: new google.maps.LatLng(0, 0),
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapTypeControl: true,
+    mapTypeControlOptions:
+        {style: is_mobile ? google.maps.MapTypeControlStyle.DROPDOWN_MENU :
+                            google.maps.MapTypeControlStyle.DEFAULT},
     scaleControl: true,
     navigationControl: true,
-    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL}
+    navigationControlOptions:
+        {style: google.maps.NavigationControlStyle.DEFAULT}
   });
 }
 
@@ -69,7 +73,13 @@ function fit_map_bounds(members) {
 
 function populate_list(tbody, members, show_distance) {
   var rows = [];
+  var option = document.createElement('option');
+  option.innerText =
+      members.length + ' member' + (members.length == 1 ? '' : 's');
+  option.value = '';
+  $('member-select').appendChild(option);
   for (var i = 0; i < members.length; i++) {
+    // Add a row to the member table.
     var tr = document.createElement('tr');
     tr.onclick = make_selector(i);
     var td = document.createElement('td');
@@ -78,9 +88,8 @@ function populate_list(tbody, members, show_distance) {
     td.onmouseover = make_highlighter(i);
     td.onmouseout = make_unhighlighter(i);
     tr.appendChild(td);
+    var distance = '';
     if (show_distance) {
-      var td = document.createElement('td');
-      td.className = 'distance';
       var km = Math.round(members[i].distance / 100)/10 + '';
       if (km.indexOf('.') < 0) {
         km += '.0';
@@ -88,13 +97,25 @@ function populate_list(tbody, members, show_distance) {
       if (members[i].distance >= 10000) {
         km = Math.round(members[i].distance / 1000);
       }
-      td.innerText = km + ' km';
+      distance = members[i].is_self ? '(you)' : km + ' km';
+
+      // Add a cell for the distance.
+      var td = document.createElement('td');
+      td.className = 'distance';
+      td.innerText = distance;
       td.onmouseover = make_highlighter(i);
       td.onmouseout = make_unhighlighter(i);
       tr.appendChild(td);
     }
     tbody.appendChild(tr);
     rows.push(tr);
+
+    // Add an option to the member menu.
+    option = document.createElement('option');
+    option.innerText = members[i].nickname + ' ' + distance;
+    option.value = i;
+    option.onclick = make_selector(i);
+    $('member-select').appendChild(option);
   }
   if (members.length == 0) {
     var tr = document.createElement('tr');
@@ -109,26 +130,33 @@ function populate_list(tbody, members, show_distance) {
   return rows;
 }
 
-function make_selector(i) {
-  function select() {
+function select(i) {
+  if (i !== '') {
     map.panTo(new google.maps.LatLng(members[i].lat, members[i].lon));
+    highlight(i);
+    setTimeout(function() { unhighlight(i); $('member-select').value = ''; }, 1000);
   }
-  return select;
+}
+
+function make_selector(i) {
+  return function() { select(i); };
+}
+
+function highlight(i) {
+  rows[i].style.backgroundColor = '#ff8';
+  markers[i].setIcon(
+    members[i].is_self ? HIGHLIGHTED_SELF_PIN : HIGHLIGHTED_PIN);
 }
 
 function make_highlighter(i) {
-  function highlight() {
-    rows[i].style.backgroundColor = '#ff8';
-    markers[i].setIcon(
-      members[i].is_self ? HIGHLIGHTED_SELF_PIN : HIGHLIGHTED_PIN);
-  }
-  return highlight;
+  return function() { highlight(i); };
+}
+
+function unhighlight(i) {
+  rows[i].style.backgroundColor = '#fff';
+  markers[i].setIcon(members[i].is_self ? SELF_PIN : UNHIGHLIGHTED_PIN);
 }
 
 function make_unhighlighter(i) {
-  function unhighlight() {
-    rows[i].style.backgroundColor = '#fff';
-    markers[i].setIcon(members[i].is_self ? SELF_PIN : UNHIGHLIGHTED_PIN);
-  }
-  return unhighlight;
+  return function() { unhighlight(i); };
 }

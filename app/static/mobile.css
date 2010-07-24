@@ -1,0 +1,11 @@
+/* These sizes depend on the <meta name="viewport"> tag in page.html. */
+#header { display: none; }
+#tag { background: none; }
+#tag h1, #controls, #member-select { font-size: 22px; }
+#map, .vshadow { left: 0; top: 36px; }
+.hshadow { display: none; }
+#map { bottom: 36px; }
+#tag { top: 0; height: 36px; }
+#member-table { display: none; }
+#member-select { display: block; position: absolute; top: 0; right: 0; }
+#controls { top: auto; bottom: 0; left: 0; right: 0; padding: 0 4px; }

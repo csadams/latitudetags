@@ -74,9 +74,12 @@ class Handler(webapp.RequestHandler):
             self.xsrf_key = model.Config.get_or_generate('xsrf_key')
 
         # Populate self.vars with useful variables for templates.
+        agent = request.headers['User-Agent']
+        is_mobile = re.search('iPhone|Android', agent) or request.get('mobile')
         self.vars = {'user': self.user, 'member': self.member,
                      'login_url': users.create_login_url(request.uri),
-                     'logout_url': users.create_logout_url(request.uri)}
+                     'logout_url': users.create_logout_url(request.uri),
+                     'is_mobile': is_mobile}
 
     def set_signature(self, lifetime=None):
         """Generates a signature to prevent XSRF (a confused deputy attack)."""
