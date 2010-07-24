@@ -20,7 +20,9 @@
     <div class="user">
       {% if vars.user %}
         <span class="email">{{ vars.user.email|escape }}</span>
-        {% if vars.member %}({{ vars.member.nickname|escape }}){% endif %}
+        {% if vars.member %}
+          <span class="nickname">({{ vars.member.nickname|escape }})</span>
+        {% endif %}
         &nbsp;
         <a href="{{ vars.logout_url|escape }}">{% trans "Sign out" %}</a>
       {% else %}

@@ -15,6 +15,7 @@
 
 <div id="tag">
   <h1 class="tag content">#{{ tag|escape }}</h1>
+  <select id="member-select" onchange="select(this.value)"></select>
 </div>
 
 <div id="controls">
@@ -59,9 +60,6 @@
   <tbody id="members-tbody">
   </tbody>
 </table>
-
-<select id="member-select" onchange="select(this.value)">
-</select>
 
 <form method="get" id="join-form" style="display: none">
   <input type=hidden name=join value=1>

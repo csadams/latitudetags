@@ -4,7 +4,7 @@ body { font-family: helvetica, arial; font-size: 13px; }
 /* Styles common to all pages. */
 
 #header div { position: absolute; top: 0; padding: 4px; }
-#header .title { left: 0; font-weight: bold; }
+#header .title { display: block; left: 0; font-weight: bold; }
 #header .title a { text-decoration: none; color: #000; }
 #header .user { right: 0; padding: 4px 8px; }
 #header .email { font-weight: bold; }
@@ -38,7 +38,7 @@ body { font-family: helvetica, arial; font-size: 13px; }
 /* Main page. */
 
 #main-page .vshadow { left: 0; }
-.navigate { text-align: center; margin: 3em 0; }
+.navigate { text-align: center; margin: 3em 0 2em; }
 .navigate, .navigate input, .navigate button {
     font-family: helvetica, arial; font-size: 30px; }
 .navigate input { margin: 12px 4px; width: 8.5em; }
