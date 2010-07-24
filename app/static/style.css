@@ -13,10 +13,10 @@ body { font-family: helvetica, arial; font-size: 13px; }
 /* Tag page. */
 
 #tag, #controls, #member-table { position: absolute; left: 0; }
-#tag { top: 24px; width: 260px; height: 40px; background: #dde; }
+#tag { top: 24px; width: 250px; height: 40px; background: #dde; }
 #tag h1 { margin: 0; font-size: 26px; }
-#controls { top: 64px; width: 260px; height: 36px; white-space: nowrap; }
-#member-table { top: 100px; width: 260px; bottom: 0; }
+#controls { top: 64px; width: 250px; height: 36px; white-space: nowrap; }
+#member-table { top: 100px; width: 250px; bottom: 0; }
 #member-table thead th { border-bottom: 1px solid #eef; }
 #member-table th, #member-table td { padding: 4px; }
 #member-table .nickname { text-align: left; }
@@ -24,7 +24,7 @@ body { font-family: helvetica, arial; font-size: 13px; }
 #member-table tbody tr { cursor: pointer; }
 #member-select { display: none; }
 
-#map, .hshadow, .vshadow { position: absolute; left: 260px; top: 24px; }
+#map, .hshadow, .vshadow { position: absolute; left: 250px; top: 24px; }
 #map { right: 0; bottom: 0; }
 .hshadow { bottom: 0; background: #000; font-size: 1px; }
 .hs1 { width: 2px; opacity: 0.09; filter:alpha(opacity=9); }
