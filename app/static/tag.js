@@ -134,7 +134,11 @@ function select(i) {
   if (i !== '') {
     map.panTo(new google.maps.LatLng(members[i].lat, members[i].lon));
     highlight(i);
-    setTimeout(function() { unhighlight(i); $('member-select').value = ''; }, 1000);
+    // Make the pushpin flash twice, then revert the dropdown selection.
+    setTimeout(function() { unhighlight(i); }, 600);
+    setTimeout(function() { highlight(i); }, 1000);
+    setTimeout(function() { unhighlight(i); }, 1400);
+    setTimeout(function() { $('member-select').value = ''; }, 1800);
   }
 }
 
