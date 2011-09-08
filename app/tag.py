@@ -20,6 +20,7 @@ from google.appengine.api.labs import taskqueue
 import datetime
 import geo
 import model
+import re
 import simplejson
 import utils
 
@@ -70,7 +71,7 @@ class Tag(utils.Handler):
                     join_time=join_time, members=simplejson.dumps(members))
 
     def get_member_info(self, member):
-        info = {'nickname': member.nickname,
+        info = {'nickname': re.sub('[<>&]', '', member.nickname),
                 'lat': member.location.lat,
                 'lon': member.location.lon}
         if self.member:
