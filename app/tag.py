@@ -56,11 +56,12 @@ class Tag(utils.Handler):
         join_time = ''
         members = []
         for member in model.Member.get_for_tag(tag, now):
-            if member.user.user_id() == user_id:
-                join_time = utils.describe_delta(
-                    member.get_stop_time(tag) - now)
-            else:
-                members.append(self.get_member_info(member))
+            if member.location:
+                if member.user.user_id() == user_id:
+                    join_time = utils.describe_delta(
+                        member.get_stop_time(tag) - now)
+                else:
+                    members.append(self.get_member_info(member))
         members.sort(key=lambda m: (m.get('distance', 0), m['nickname']))
         if join_time:
             members.insert(0, self.get_member_info(self.member))
